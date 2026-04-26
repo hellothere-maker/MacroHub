@@ -1,0 +1,982 @@
+-- -------------------------------------------
+local Players = game:GetService("Players")
+local CAS = game:GetService("ContextActionService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local UIS = game:GetService("UserInputService")
+local VIM = game:GetService("VirtualInputManager")
+local LocalPlayer = Players.LocalPlayer
+
+local xX_mainGuiHolder_Xx = Instance.new("ScreenGui")
+xX_mainGuiHolder_Xx.Name = "macroball_cc"
+xX_mainGuiHolder_Xx.Parent = CoreGui
+xX_mainGuiHolder_Xx.ResetOnSpawn = false
+xX_mainGuiHolder_Xx.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local blockButton = nil
+pcall(function()
+	blockButton = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("Hotbar"):WaitForChild("Block", 5)
+end)
+
+local function smoothMove(obj, props, dur, style)
+	local tInfo = TweenInfo.new(dur, style or Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+	local tweens = TweenService:Create(obj, tInfo, props)
+	tweens:Play()
+	return tweens
+end
+
+local function addCorner(obj, radius)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, radius)
+	c.Parent = obj
+end
+
+local draggable = Instance.new("Frame")
+draggable.Name = "draggable"
+draggable.Parent = xX_mainGuiHolder_Xx
+draggable.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+draggable.BackgroundTransparency = 1
+draggable.BorderSizePixel = 0
+draggable.Position = UDim2.new(0.35, 0, 0.12, -200)
+draggable.Size = UDim2.new(0, 290, 0, 320)
+draggable.ClipsDescendants = false
+addCorner(draggable, 10)
+
+local draggableStroke = Instance.new("UIStroke")
+draggableStroke.Thickness = 1.2
+draggableStroke.Transparency = 1
+draggableStroke.Color = Color3.fromRGB(255, 255, 255)
+draggableStroke.Parent = draggable
+
+local draggableShadow = Instance.new("ImageLabel")
+draggableShadow.Name = "shadow"
+draggableShadow.Parent = draggable
+draggableShadow.BackgroundTransparency = 1
+draggableShadow.Position = UDim2.new(0, -5, 0, -5)
+draggableShadow.Size = UDim2.new(1, 10, 1, 10)
+draggableShadow.Image = "rbxassetid://6014261993"
+draggableShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+draggableShadow.ImageTransparency = 0.5
+draggableShadow.ScaleType = Enum.ScaleType.Slice
+draggableShadow.SliceCenter = Rect.new(49, 49, 49, 49)
+draggableShadow.ZIndex = -1
+
+local dragBar = Instance.new("Frame")
+dragBar.Name = "dragHeader"
+dragBar.Parent = draggable
+dragBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+dragBar.BackgroundTransparency = 1
+dragBar.BorderSizePixel = 0
+dragBar.Size = UDim2.new(1, 0, 0, 32)
+dragBar.ZIndex = 3
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "macroball.cc"
+titleLabel.Parent = dragBar
+titleLabel.BackgroundTransparency = 1
+titleLabel.Position = UDim2.new(0, 14, 0, 0)
+titleLabel.Size = UDim2.new(0.6, 0, 1, 0)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.Text = "macroball.cc"
+titleLabel.TextColor3 = Color3.fromRGB(210, 210, 230)
+titleLabel.TextTransparency = 1
+titleLabel.TextSize = 13
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.ZIndex = 5
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Name = "closeBtn"
+closeBtn.Parent = dragBar
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 55, 55)
+closeBtn.BackgroundTransparency = 1
+closeBtn.Position = UDim2.new(1, -30, 0.5, -9)
+closeBtn.Size = UDim2.new(0, 22, 0, 18)
+closeBtn.Text = "x"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.TextTransparency = 1
+closeBtn.TextSize = 12
+closeBtn.ZIndex = 5
+addCorner(closeBtn, 5)
+
+local descLabel = Instance.new("TextLabel")
+descLabel.Name = "descText"
+descLabel.Parent = draggable
+descLabel.BackgroundTransparency = 1
+descLabel.Position = UDim2.new(0, 16, 0, 40)
+descLabel.Size = UDim2.new(1, -32, 0, 14)
+descLabel.Font = Enum.Font.GothamSemibold
+descLabel.Text = "v1 | decent macro"
+descLabel.TextColor3 = Color3.fromRGB(170, 170, 200)
+descLabel.TextTransparency = 1
+descLabel.TextSize = 10
+descLabel.TextXAlignment = Enum.TextXAlignment.Left
+descLabel.ZIndex = 4
+
+local divider1 = Instance.new("Frame")
+divider1.Name = "divider"
+divider1.Parent = draggable
+divider1.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+divider1.BackgroundTransparency = 1
+divider1.BorderSizePixel = 0
+divider1.Position = UDim2.new(0, 16, 0, 58)
+divider1.Size = UDim2.new(1, -32, 0, 1)
+divider1.ZIndex = 4
+
+local CPSbox = Instance.new("Frame")
+CPSbox.Name = "CPSbox"
+CPSbox.Parent = draggable
+CPSbox.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+CPSbox.BackgroundTransparency = 1
+CPSbox.BorderSizePixel = 0
+CPSbox.Position = UDim2.new(0, 16, 0, 66)
+CPSbox.Size = UDim2.new(1, -32, 0, 38)
+CPSbox.ZIndex = 3
+addCorner(CPSbox, 8)
+local CPSboxStroke = Instance.new("UIStroke")
+CPSboxStroke.Thickness = 0.8
+CPSboxStroke.Transparency = 1
+CPSboxStroke.Color = Color3.fromRGB(255, 255, 255)
+CPSboxStroke.Parent = CPSbox
+
+local cpsTargetLabel = Instance.new("TextLabel")
+cpsTargetLabel.Name = "cpscounter"
+cpsTargetLabel.Parent = CPSbox
+cpsTargetLabel.BackgroundTransparency = 1
+cpsTargetLabel.Position = UDim2.new(0, 12, 0, 0)
+cpsTargetLabel.Size = UDim2.new(0.5, 0, 0.55, 0)
+cpsTargetLabel.Font = Enum.Font.GothamSemibold
+cpsTargetLabel.Text = "target: 700"
+cpsTargetLabel.TextColor3 = Color3.fromRGB(150, 150, 190)
+cpsTargetLabel.TextTransparency = 1
+cpsTargetLabel.TextSize = 10
+cpsTargetLabel.TextXAlignment = Enum.TextXAlignment.Left
+cpsTargetLabel.ZIndex = 5
+
+local cpsActualLabel = Instance.new("TextLabel")
+cpsActualLabel.Name = "calculated_CPS"
+cpsActualLabel.Parent = CPSbox
+cpsActualLabel.BackgroundTransparency = 1
+cpsActualLabel.Position = UDim2.new(0, 12, 0.5, 0)
+cpsActualLabel.Size = UDim2.new(0.5, 0, 0.5, 0)
+cpsActualLabel.Font = Enum.Font.GothamBold
+cpsActualLabel.Text = "actual: 0"
+cpsActualLabel.TextColor3 = Color3.fromRGB(180, 180, 220)
+cpsActualLabel.TextTransparency = 1
+cpsActualLabel.TextSize = 10
+cpsActualLabel.TextXAlignment = Enum.TextXAlignment.Left
+cpsActualLabel.ZIndex = 5
+
+local cpsValue = Instance.new("TextLabel")
+cpsValue.Name = "cpsValueDisplay"
+cpsValue.Parent = CPSbox
+cpsValue.BackgroundTransparency = 1
+cpsValue.Position = UDim2.new(0.5, -12, 0, 0)
+cpsValue.Size = UDim2.new(0.5, 0, 1, 0)
+cpsValue.Font = Enum.Font.GothamBlack
+cpsValue.Text = "0"
+cpsValue.TextColor3 = Color3.fromRGB(100, 190, 255)
+cpsValue.TextTransparency = 1
+cpsValue.TextSize = 18
+cpsValue.TextXAlignment = Enum.TextXAlignment.Right
+cpsValue.ZIndex = 5
+
+local clicking = Instance.new("Frame")
+clicking.Name = "clicking"
+clicking.Parent = draggable
+clicking.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+clicking.BackgroundTransparency = 1
+clicking.BorderSizePixel = 0
+clicking.Position = UDim2.new(0, 16, 0, 110)
+clicking.Size = UDim2.new(1, -32, 0, 52)
+clicking.ZIndex = 3
+addCorner(clicking, 8)
+local clickingStroke = Instance.new("UIStroke")
+clickingStroke.Thickness = 0.8
+clickingStroke.Transparency = 1
+clickingStroke.Color = Color3.fromRGB(255, 255, 255)
+clickingStroke.Parent = clicking
+
+local cpsSliderLabel = Instance.new("TextLabel")
+cpsSliderLabel.Parent = clicking
+cpsSliderLabel.BackgroundTransparency = 1
+cpsSliderLabel.Position = UDim2.new(0, 12, 0, 6)
+cpsSliderLabel.Size = UDim2.new(0.35, 0, 0, 15)
+cpsSliderLabel.Font = Enum.Font.GothamSemibold
+cpsSliderLabel.Text = "set cps"
+cpsSliderLabel.TextColor3 = Color3.fromRGB(170, 170, 200)
+cpsSliderLabel.TextTransparency = 1
+cpsSliderLabel.TextSize = 10
+cpsSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+cpsSliderLabel.ZIndex = 5
+
+local sliderBg = Instance.new("Frame")
+sliderBg.Name = "sliderTrack"
+sliderBg.Parent = clicking
+sliderBg.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+sliderBg.BackgroundTransparency = 1
+sliderBg.BorderSizePixel = 0
+sliderBg.Position = UDim2.new(0, 12, 0, 28)
+sliderBg.Size = UDim2.new(1, -24, 0, 5)
+sliderBg.ZIndex = 5
+addCorner(sliderBg, 12)
+
+local sliderFill = Instance.new("Frame")
+sliderFill.Name = "sliderFillBar"
+sliderFill.Parent = sliderBg
+sliderFill.BackgroundColor3 = Color3.fromRGB(100, 190, 255)
+sliderFill.BorderSizePixel = 0
+sliderFill.Size = UDim2.new(0.116, 0, 1, 0)
+sliderFill.ZIndex = 6
+addCorner(sliderFill, 12)
+
+local sliderKnob = Instance.new("TextButton")
+sliderKnob.Name = "sliderKnobBtn"
+sliderKnob.Parent = sliderBg
+sliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+sliderKnob.BackgroundTransparency = 1
+sliderKnob.BorderSizePixel = 0
+sliderKnob.Position = UDim2.new(0.116, -7, 0.5, -7)
+sliderKnob.Size = UDim2.new(0, 14, 0, 14)
+sliderKnob.Text = ""
+sliderKnob.ZIndex = 7
+addCorner(sliderKnob, 14)
+local sliderKnobStroke = Instance.new("UIStroke")
+sliderKnobStroke.Thickness = 1.8
+sliderKnobStroke.Transparency = 1
+sliderKnobStroke.Color = Color3.fromRGB(255, 255, 255)
+sliderKnobStroke.Parent = sliderKnob
+
+local cpsMinText = Instance.new("TextLabel")
+cpsMinText.Parent = clicking
+cpsMinText.BackgroundTransparency = 1
+cpsMinText.Position = UDim2.new(0, 12, 0, 36)
+cpsMinText.Size = UDim2.new(0.3, 0, 0, 12)
+cpsMinText.Font = Enum.Font.Gotham
+cpsMinText.Text = "1"
+cpsMinText.TextColor3 = Color3.fromRGB(110, 110, 140)
+cpsMinText.TextTransparency = 1
+cpsMinText.TextSize = 8
+cpsMinText.TextXAlignment = Enum.TextXAlignment.Left
+cpsMinText.ZIndex = 5
+
+local cpsMaxText = Instance.new("TextLabel")
+cpsMaxText.Parent = clicking
+cpsMaxText.BackgroundTransparency = 1
+cpsMaxText.Position = UDim2.new(0.7, 0, 0, 36)
+cpsMaxText.Size = UDim2.new(0.3, -12, 0, 12)
+cpsMaxText.Font = Enum.Font.Gotham
+cpsMaxText.Text = "2500"
+cpsMaxText.TextColor3 = Color3.fromRGB(110, 110, 140)
+cpsMaxText.TextTransparency = 1
+cpsMaxText.TextSize = 8
+cpsMaxText.TextXAlignment = Enum.TextXAlignment.Right
+cpsMaxText.ZIndex = 5
+
+local setkeybind = Instance.new("Frame")
+setkeybind.Name = "setkeybind"
+setkeybind.Parent = draggable
+setkeybind.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+setkeybind.BackgroundTransparency = 1
+setkeybind.BorderSizePixel = 0
+setkeybind.Position = UDim2.new(0, 16, 0, 168)
+setkeybind.Size = UDim2.new(1, -32, 0, 50)
+setkeybind.ZIndex = 3
+addCorner(setkeybind, 8)
+local setkeybindStroke = Instance.new("UIStroke")
+setkeybindStroke.Thickness = 0.8
+setkeybindStroke.Transparency = 1
+setkeybindStroke.Color = Color3.fromRGB(255, 255, 255)
+setkeybindStroke.Parent = setkeybind
+
+local keybindLabel = Instance.new("TextLabel")
+keybindLabel.Name = "keybindTitle"
+keybindLabel.Parent = setkeybind
+keybindLabel.BackgroundTransparency = 1
+keybindLabel.Position = UDim2.new(0, 12, 0, 6)
+keybindLabel.Size = UDim2.new(1, -24, 0, 14)
+keybindLabel.Font = Enum.Font.GothamSemibold
+keybindLabel.Text = "Clash Key"
+keybindLabel.TextColor3 = Color3.fromRGB(180, 180, 210)
+keybindLabel.TextTransparency = 1
+keybindLabel.TextSize = 11
+keybindLabel.TextXAlignment = Enum.TextXAlignment.Left
+keybindLabel.ZIndex = 5
+
+local keybindBtn = Instance.new("TextButton")
+keybindBtn.Name = "keybindChanged"
+keybindBtn.Parent = setkeybind
+keybindBtn.BackgroundColor3 = Color3.fromRGB(60, 100, 60)
+keybindBtn.BackgroundTransparency = 1
+keybindBtn.BorderSizePixel = 0
+keybindBtn.Position = UDim2.new(0, 12, 0, 24)
+keybindBtn.Size = UDim2.new(0, 100, 0, 18)
+keybindBtn.Text = "F"
+keybindBtn.Font = Enum.Font.GothamBold
+keybindBtn.TextColor3 = Color3.fromRGB(200, 200, 230)
+keybindBtn.TextTransparency = 1
+keybindBtn.TextSize = 11
+keybindBtn.ZIndex = 5
+addCorner(keybindBtn, 5)
+
+local spamMethodLabel = Instance.new("TextLabel")
+spamMethodLabel.Name = "spamMethodLabel"
+spamMethodLabel.Parent = setkeybind
+spamMethodLabel.BackgroundTransparency = 1
+spamMethodLabel.Position = UDim2.new(0, 120, 0, 6)
+spamMethodLabel.Size = UDim2.new(0, 100, 0, 14)
+spamMethodLabel.Font = Enum.Font.GothamSemibold
+spamMethodLabel.Text = "Spam Key"
+spamMethodLabel.TextColor3 = Color3.fromRGB(180, 180, 210)
+spamMethodLabel.TextTransparency = 1
+spamMethodLabel.TextSize = 11
+spamMethodLabel.TextXAlignment = Enum.TextXAlignment.Left
+spamMethodLabel.ZIndex = 5
+
+local spamKeyBtn = Instance.new("TextButton")
+spamKeyBtn.Name = "spamKeyBtn"
+spamKeyBtn.Parent = setkeybind
+spamKeyBtn.BackgroundColor3 = Color3.fromRGB(100, 60, 60)
+spamKeyBtn.BackgroundTransparency = 1
+spamKeyBtn.BorderSizePixel = 0
+spamKeyBtn.Position = UDim2.new(0, 120, 0, 24)
+spamKeyBtn.Size = UDim2.new(0, 100, 0, 18)
+spamKeyBtn.Text = "Mouse1"
+spamKeyBtn.Font = Enum.Font.GothamBold
+spamKeyBtn.TextColor3 = Color3.fromRGB(200, 200, 230)
+spamKeyBtn.TextTransparency = 1
+spamKeyBtn.TextSize = 11
+spamKeyBtn.ZIndex = 5
+addCorner(spamKeyBtn, 5)
+
+local progressBg = Instance.new("Frame")
+progressBg.Name = "progressBackground"
+progressBg.Parent = draggable
+progressBg.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+progressBg.BackgroundTransparency = 1
+progressBg.BorderSizePixel = 0
+progressBg.Position = UDim2.new(0, 16, 0, 226)
+progressBg.Size = UDim2.new(1, -32, 0, 5)
+progressBg.ZIndex = 5
+addCorner(progressBg, 14)
+
+local progressFill = Instance.new("Frame")
+progressFill.Name = "progressBarFill"
+progressFill.Parent = progressBg
+progressFill.BackgroundColor3 = Color3.fromRGB(100, 190, 255)
+progressFill.BorderSizePixel = 0
+progressFill.Size = UDim2.new(0, 0, 1, 0)
+progressFill.ZIndex = 6
+addCorner(progressFill, 14)
+
+local creditsFrame = Instance.new("Frame")
+creditsFrame.Name = "creditsContainer"
+creditsFrame.Parent = draggable
+creditsFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+creditsFrame.BackgroundTransparency = 1
+creditsFrame.BorderSizePixel = 0
+creditsFrame.Position = UDim2.new(0, 16, 0, 240)
+creditsFrame.Size = UDim2.new(1, -32, 0, 44)
+creditsFrame.ZIndex = 3
+addCorner(creditsFrame, 8)
+local creditsStroke = Instance.new("UIStroke")
+creditsStroke.Thickness = 0.8
+creditsStroke.Transparency = 1
+creditsStroke.Color = Color3.fromRGB(255, 255, 255)
+creditsStroke.Parent = creditsFrame
+
+local creditsMainLabel = Instance.new("TextLabel")
+creditsMainLabel.Name = "creditsText"
+creditsMainLabel.Parent = creditsFrame
+creditsMainLabel.BackgroundTransparency = 1
+creditsMainLabel.Position = UDim2.new(0, 10, 0, 6)
+creditsMainLabel.Size = UDim2.new(1, -20, 0, 16)
+creditsMainLabel.Font = Enum.Font.GothamBold
+creditsMainLabel.Text = "made by ArchivedCL"
+creditsMainLabel.TextColor3 = Color3.fromRGB(200, 200, 230)
+creditsMainLabel.TextTransparency = 1
+creditsMainLabel.TextSize = 11
+creditsMainLabel.TextXAlignment = Enum.TextXAlignment.Center
+creditsMainLabel.ZIndex = 5
+
+local creditsDiscord = Instance.new("TextLabel")
+creditsDiscord.Name = "discordText"
+creditsDiscord.Parent = creditsFrame
+creditsDiscord.BackgroundTransparency = 1
+creditsDiscord.Position = UDim2.new(0, 10, 0, 24)
+creditsDiscord.Size = UDim2.new(1, -20, 0, 14)
+creditsDiscord.Font = Enum.Font.Gotham
+creditsDiscord.Text = "discord: sk4bz_"
+creditsDiscord.TextColor3 = Color3.fromRGB(140, 140, 180)
+creditsDiscord.TextTransparency = 1
+creditsDiscord.TextSize = 9
+creditsDiscord.TextXAlignment = Enum.TextXAlignment.Center
+creditsDiscord.ZIndex = 5
+
+local bottomBar = Instance.new("Frame")
+bottomBar.Name = "bottomInfo"
+bottomBar.Parent = draggable
+bottomBar.BackgroundTransparency = 1
+bottomBar.Position = UDim2.new(0, 16, 0, 292)
+bottomBar.Size = UDim2.new(1, -32, 0, 18)
+bottomBar.ZIndex = 4
+
+local warningLabel = Instance.new("TextLabel")
+warningLabel.Name = "warningLabel"
+warningLabel.Parent = bottomBar
+warningLabel.BackgroundTransparency = 1
+warningLabel.Position = UDim2.new(0, 0, 0, 0)
+warningLabel.Size = UDim2.new(0.65, 0, 1, 0)
+warningLabel.Font = Enum.Font.Gotham
+warningLabel.Text = "currently making this better!"
+warningLabel.TextColor3 = Color3.fromRGB(190, 140, 100)
+warningLabel.TextTransparency = 1
+warningLabel.TextSize = 9
+warningLabel.TextXAlignment = Enum.TextXAlignment.Left
+warningLabel.ZIndex = 5
+
+local versionLabel = Instance.new("TextLabel")
+versionLabel.Name = "v1"
+versionLabel.Parent = bottomBar
+versionLabel.BackgroundTransparency = 1
+versionLabel.Position = UDim2.new(0.65, 0, 0, 0)
+versionLabel.Size = UDim2.new(0.35, 0, 1, 0)
+versionLabel.Font = Enum.Font.Gotham
+versionLabel.Text = "v1"
+versionLabel.TextColor3 = Color3.fromRGB(100, 100, 130)
+versionLabel.TextTransparency = 1
+versionLabel.TextSize = 9
+versionLabel.TextXAlignment = Enum.TextXAlignment.Right
+versionLabel.ZIndex = 5
+
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Name = "toggleMenuBtn"
+toggleBtn.Parent = xX_mainGuiHolder_Xx
+toggleBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+toggleBtn.BackgroundTransparency = 0.1
+toggleBtn.BorderSizePixel = 0
+toggleBtn.Position = UDim2.new(0.01, 0, 0.5, -22)
+toggleBtn.Size = UDim2.new(0, 40, 0, 40)
+toggleBtn.Text = ""
+toggleBtn.ZIndex = 10
+addCorner(toggleBtn, 10)
+
+local toggleShadow = Instance.new("ImageLabel")
+toggleShadow.Parent = toggleBtn
+toggleShadow.BackgroundTransparency = 1
+toggleShadow.Position = UDim2.new(0, -3, 0, -3)
+toggleShadow.Size = UDim2.new(1, 6, 1, 6)
+toggleShadow.Image = "rbxassetid://6014261993"
+toggleShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+toggleShadow.ImageTransparency = 0.5
+toggleShadow.ScaleType = Enum.ScaleType.Slice
+toggleShadow.SliceCenter = Rect.new(49, 49, 49, 49)
+toggleShadow.ZIndex = 9
+
+local toggleStroke = Instance.new("UIStroke")
+toggleStroke.Thickness = 1.2
+toggleStroke.Transparency = 0.65
+toggleStroke.Color = Color3.fromRGB(255, 255, 255)
+toggleStroke.Parent = toggleBtn
+
+local toggleIcon = Instance.new("TextLabel")
+toggleIcon.Parent = toggleBtn
+toggleIcon.BackgroundTransparency = 1
+toggleIcon.Size = UDim2.new(1, 0, 1, 0)
+toggleIcon.Font = Enum.Font.GothamBold
+toggleIcon.Text = ">"
+toggleIcon.TextColor3 = Color3.fromRGB(180, 180, 220)
+toggleIcon.TextSize = 17
+toggleIcon.ZIndex = 11
+
+local menuVisible = true
+local isClickingActive = false
+local activationKey = Enum.KeyCode.F
+local spamTarget = "Mouse1"
+local waitingForBind = nil
+local waitingForSpamBind = nil
+local heartbeatConn = nil
+local renderConn = nil
+local preRenderConn = nil
+local cpsUpdaterThread = nil
+local clickActionName = "macroClickAction"
+
+local totalClicks = 0
+local lastTimeChecked = tick()
+local calculatedCPS = 0
+local cpsHistoryTable = {}
+local maxCPSRecorded = 0
+local nextHeartbeatTime = 0
+local nextRenderTime = 0
+local nextPreRenderTime = 0
+local maxClicksPerFrame = 100
+local posCycleIndex = 0
+local buttonCycleIndex = 0
+
+local targetCPS = 700
+local minCPS = 1
+local maxCPS = 2500
+
+local isDraggingSlider = false
+local mousePosCache = Vector2.new(0, 0)
+
+local posOffsets = {
+	Vector2.new(0, 0), Vector2.new(1, 0), Vector2.new(0, 1), Vector2.new(1, 1),
+	Vector2.new(-1, 0), Vector2.new(0, -1), Vector2.new(-1, -1), Vector2.new(2, 0),
+	Vector2.new(2, 1), Vector2.new(1, 2), Vector2.new(-2, 0), Vector2.new(0, -2),
+	Vector2.new(-1, 1), Vector2.new(1, -1), Vector2.new(-2, -1), Vector2.new(2, -1)
+}
+
+UIS.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		mousePosCache = input.Position
+	end
+end)
+
+local function fireVIM(mX, mY, btn)
+	pcall(function()
+		VIM:SendMouseButtonEvent(mX, mY, btn, true, game, 0)
+		VIM:SendMouseButtonEvent(mX, mY, btn, false, game, 0)
+	end)
+end
+
+local function fireGUI()
+	if not blockButton then return end
+	if not blockButton:IsA("TextButton") then return end
+	pcall(function()
+		blockButton:FireServer({
+			UserInputType = Enum.UserInputType.MouseButton1,
+			UserInputState = Enum.UserInputState.Begin,
+			Position = mousePosCache
+		})
+	end)
+end
+
+local function fireCAS()
+	pcall(function()
+		CAS:FireAction("macroClickAction_CAS", Enum.UserInputState.Begin, nil)
+		CAS:FireAction("macroClickAction_CAS", Enum.UserInputState.End, nil)
+	end)
+end
+
+local function fireSpamTarget()
+	local mX = mousePosCache.X
+	local mY = mousePosCache.Y
+	if spamTarget == "Mouse1" then
+		fireVIM(mX, mY, 0)
+	elseif spamTarget == "Mouse2" then
+		fireVIM(mX, mY, 2)
+	else
+		pcall(function()
+			VIM:SendKeyEvent(true, spamTarget, false, game)
+			VIM:SendKeyEvent(false, spamTarget, false, game)
+		end)
+	end
+end
+
+local function burstVIM(count)
+	local mX = mousePosCache.X
+	local mY = mousePosCache.Y
+	for i = 1, count do
+		posCycleIndex = (posCycleIndex % 16) + 1
+		buttonCycleIndex = (buttonCycleIndex % 2) + 1
+		local btn = buttonCycleIndex == 1 and 0 or 2
+		local offset = posOffsets[posCycleIndex]
+		fireVIM(mX + offset.X, mY + offset.Y, btn)
+		totalClicks = totalClicks + 1
+	end
+end
+
+local function burstCAS(count)
+	for i = 1, count do
+		fireCAS()
+		totalClicks = totalClicks + 1
+	end
+end
+
+local function burstGUI(count)
+	for i = 1, count do
+		fireGUI()
+		totalClicks = totalClicks + 1
+	end
+end
+
+local function updateSliderVisuals()
+	local percent = (targetCPS - minCPS) / (maxCPS - minCPS)
+	sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+	sliderKnob.Position = UDim2.new(percent, -7, 0.5, -7)
+	cpsTargetLabel.Text = "target: " .. tostring(targetCPS)
+end
+
+local function handleSliderDrag()
+	local mousePos = UIS:GetMouseLocation()
+	local sliderAbsPos = sliderBg.AbsolutePosition
+	local sliderAbsSize = sliderBg.AbsoluteSize
+	local rawWidth = sliderAbsSize.X
+	if rawWidth <= 0 then return end
+	local offsetX = mousePos.X - sliderAbsPos.X
+	local relativeX = math.clamp(offsetX / rawWidth, 0, 1)
+	targetCPS = math.floor(minCPS + ((maxCPS - minCPS) * relativeX))
+	targetCPS = math.clamp(targetCPS, minCPS, maxCPS)
+	updateSliderVisuals()
+end
+
+sliderKnob.MouseButton1Down:Connect(function()
+	isDraggingSlider = true
+	handleSliderDrag()
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		isDraggingSlider = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if isDraggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
+		handleSliderDrag()
+	end
+end)
+
+sliderBg.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		isDraggingSlider = true
+		handleSliderDrag()
+	end
+end)
+
+keybindBtn.MouseButton1Click:Connect(function()
+	waitingForBind = "activation"
+	keybindBtn.Text = "..."
+	keybindBtn.TextColor3 = Color3.fromRGB(255, 200, 100)
+	local connection
+	connection = UIS.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed then return end
+		if waitingForBind == "activation" and input.UserInputType == Enum.UserInputType.Keyboard then
+			activationKey = input.KeyCode
+			keybindBtn.Text = activationKey.Name
+			keybindBtn.TextColor3 = Color3.fromRGB(200, 200, 230)
+			waitingForBind = nil
+			connection:Disconnect()
+			CAS:UnbindAction(clickActionName)
+			bindClickAction()
+		end
+	end)
+end)
+
+spamKeyBtn.MouseButton1Click:Connect(function()
+	waitingForSpamBind = true
+	spamKeyBtn.Text = "..."
+	spamKeyBtn.TextColor3 = Color3.fromRGB(255, 200, 100)
+	local connection
+	connection = UIS.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed then return end
+		if waitingForSpamBind then
+			if input.UserInputType == Enum.UserInputType.Keyboard then
+				spamTarget = input.KeyCode
+				spamKeyBtn.Text = input.KeyCode.Name
+			elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+				spamTarget = "Mouse1"
+				spamKeyBtn.Text = "Mouse1"
+			elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+				spamTarget = "Mouse2"
+				spamKeyBtn.Text = "Mouse2"
+			end
+			spamKeyBtn.TextColor3 = Color3.fromRGB(200, 200, 230)
+			waitingForSpamBind = nil
+			connection:Disconnect()
+		end
+	end)
+end)
+
+local function refreshCPSDisplay()
+	local timeNow = tick()
+	local deltaTime = timeNow - lastTimeChecked
+	if deltaTime >= 0.1 then
+		calculatedCPS = totalClicks / deltaTime
+		table.insert(cpsHistoryTable, calculatedCPS)
+		if #cpsHistoryTable > 10 then
+			table.remove(cpsHistoryTable, 1)
+		end
+		local smoothCPS = 0
+		for i = 1, #cpsHistoryTable do
+			smoothCPS = smoothCPS + cpsHistoryTable[i]
+		end
+		smoothCPS = smoothCPS / #cpsHistoryTable
+		if smoothCPS > maxCPSRecorded then
+			maxCPSRecorded = smoothCPS
+		end
+		totalClicks = 0
+		lastTimeChecked = timeNow
+		local displayValue = math.floor(smoothCPS + 0.5)
+		cpsValue.Text = tostring(displayValue)
+		cpsActualLabel.Text = "actual: " .. tostring(displayValue)
+		local percentToTarget = smoothCPS / targetCPS
+		if percentToTarget >= 0.92 then
+			cpsValue.TextColor3 = Color3.fromRGB(100, 220, 100)
+		elseif percentToTarget >= 0.65 then
+			cpsValue.TextColor3 = Color3.fromRGB(100, 190, 255)
+		else
+			cpsValue.TextColor3 = Color3.fromRGB(255, 160, 100)
+		end
+	end
+end
+
+local function cpsUpdateLoopFunction()
+	while isClickingActive do
+		refreshCPSDisplay()
+		local percentForBar = math.clamp(calculatedCPS / targetCPS, 0, 1)
+		smoothMove(progressFill, {Size = UDim2.new(percentForBar, 0, 1, 0)}, 0.04)
+		task.wait(0.05)
+	end
+end
+
+local function heartbeatBurst()
+	if not isClickingActive then return end
+	local now = tick()
+	if now >= nextHeartbeatTime then
+		local diff = now - nextHeartbeatTime
+		local interval = 1.0 / (targetCPS / 3)
+		local needed = math.floor(diff / interval) + 1
+		needed = math.clamp(needed, 1, maxClicksPerFrame)
+		burstVIM(needed)
+		fireSpamTarget()
+		totalClicks = totalClicks + 1
+		nextHeartbeatTime = nextHeartbeatTime + (needed * interval)
+		if nextHeartbeatTime <= now then
+			nextHeartbeatTime = now + interval
+		end
+	end
+end
+
+local function renderBurst()
+	if not isClickingActive then return end
+	local now = tick()
+	if now >= nextRenderTime then
+		local diff = now - nextRenderTime
+		local interval = 1.0 / (targetCPS / 3)
+		local needed = math.floor(diff / interval) + 1
+		needed = math.clamp(needed, 1, maxClicksPerFrame)
+		burstCAS(needed)
+		nextRenderTime = nextRenderTime + (needed * interval)
+		if nextRenderTime <= now then
+			nextRenderTime = now + interval
+		end
+	end
+end
+
+local function preRenderBurst()
+	if not isClickingActive then return end
+	local now = tick()
+	if now >= nextPreRenderTime then
+		local diff = now - nextPreRenderTime
+		local interval = 1.0 / (targetCPS / 3)
+		local needed = math.floor(diff / interval) + 1
+		needed = math.clamp(needed, 1, maxClicksPerFrame)
+		burstGUI(needed)
+		nextPreRenderTime = nextPreRenderTime + (needed * interval)
+		if nextPreRenderTime <= now then
+			nextPreRenderTime = now + interval
+		end
+	end
+end
+
+local function startTheClicking()
+	if isClickingActive then return end
+	isClickingActive = true
+	totalClicks = 0
+	lastTimeChecked = tick()
+	calculatedCPS = 0
+	maxCPSRecorded = 0
+	cpsHistoryTable = {}
+	nextHeartbeatTime = tick()
+	nextRenderTime = tick()
+	nextPreRenderTime = tick()
+	posCycleIndex = 0
+	buttonCycleIndex = 0
+	maxClicksPerFrame = math.clamp(math.ceil(targetCPS / 18), 1, 150)
+	cpsValue.Text = "0"
+	cpsValue.TextColor3 = Color3.fromRGB(100, 190, 255)
+	heartbeatConn = RunService.Heartbeat:Connect(heartbeatBurst)
+	renderConn = RunService.RenderStepped:Connect(renderBurst)
+	preRenderConn = RunService.PreRender:Connect(preRenderBurst)
+	cpsUpdaterThread = task.spawn(cpsUpdateLoopFunction)
+	smoothMove(draggableStroke, {Transparency = 0.3, Color = Color3.fromRGB(100, 190, 255)}, 0.08)
+end
+
+local function stopTheClicking()
+	if not isClickingActive then return end
+	isClickingActive = false
+	if heartbeatConn then heartbeatConn:Disconnect() heartbeatConn = nil end
+	if renderConn then renderConn:Disconnect() renderConn = nil end
+	if preRenderConn then preRenderConn:Disconnect() preRenderConn = nil end
+	if cpsUpdaterThread then task.cancel(cpsUpdaterThread) cpsUpdaterThread = nil end
+	task.wait(0.05)
+	cpsValue.Text = tostring(math.floor(maxCPSRecorded + 0.5))
+	smoothMove(progressFill, {Size = UDim2.new(0, 0, 1, 0)}, 0.2)
+	smoothMove(draggableStroke, {Transparency = 0.7, Color = Color3.fromRGB(255, 255, 255)}, 0.15)
+end
+
+local function onMacroAction(actionName, inputState, inputObject)
+	if inputState == Enum.UserInputState.Begin then
+		startTheClicking()
+	elseif inputState == Enum.UserInputState.End then
+		stopTheClicking()
+	end
+end
+
+local function bindClickAction()
+	CAS:BindAction(clickActionName, onMacroAction, false, activationKey)
+end
+
+bindClickAction()
+
+local isDraggingFrame = false
+local dragStartPos, frameStartPos
+
+dragBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		isDraggingFrame = true
+		dragStartPos = input.Position
+		frameStartPos = draggable.Position
+		smoothMove(draggable, {BackgroundTransparency = 0.05}, 0.08)
+	end
+end)
+
+dragBar.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 and isDraggingFrame then
+		isDraggingFrame = false
+		smoothMove(draggable, {BackgroundTransparency = 0.12}, 0.08)
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if isDraggingFrame and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local movementDiff = input.Position - dragStartPos
+		draggable.Position = UDim2.new(
+			frameStartPos.X.Scale,
+			frameStartPos.X.Offset + movementDiff.X,
+			frameStartPos.Y.Scale,
+			frameStartPos.Y.Offset + movementDiff.Y
+		)
+	end
+end)
+
+local isDraggingToggle = false
+local toggleDragStart, toggleStartPos
+
+toggleBtn.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		isDraggingToggle = true
+		toggleDragStart = input.Position
+		toggleStartPos = toggleBtn.Position
+		smoothMove(toggleBtn, {BackgroundTransparency = 0.05}, 0.08)
+	end
+end)
+
+toggleBtn.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if isDraggingToggle then
+			isDraggingToggle = false
+			smoothMove(toggleBtn, {BackgroundTransparency = 0.1}, 0.08)
+			return
+		end
+		toggleMenuVisibility(not menuVisible)
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if isDraggingToggle and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local movementDiff = input.Position - toggleDragStart
+		toggleBtn.Position = UDim2.new(
+			toggleStartPos.X.Scale,
+			toggleStartPos.X.Offset + movementDiff.X,
+			toggleStartPos.Y.Scale,
+			toggleStartPos.Y.Offset + movementDiff.Y
+		)
+	end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+	toggleMenuVisibility(false)
+end)
+
+local function fadeInAll()
+	smoothMove(draggable, {BackgroundTransparency = 0.12, Position = UDim2.new(0.35, 0, 0.25, 0)}, 0.35, Enum.EasingStyle.Quart)
+	smoothMove(draggableStroke, {Transparency = 0.7}, 0.35)
+	smoothMove(divider1, {BackgroundTransparency = 0.6}, 0.35)
+	smoothMove(CPSbox, {BackgroundTransparency = 0.5}, 0.35)
+	smoothMove(CPSboxStroke, {Transparency = 0.75}, 0.35)
+	smoothMove(clicking, {BackgroundTransparency = 0.5}, 0.35)
+	smoothMove(clickingStroke, {Transparency = 0.75}, 0.35)
+	smoothMove(setkeybind, {BackgroundTransparency = 0.5}, 0.35)
+	smoothMove(setkeybindStroke, {Transparency = 0.75}, 0.35)
+	smoothMove(progressBg, {BackgroundTransparency = 0.6}, 0.35)
+	smoothMove(creditsFrame, {BackgroundTransparency = 0.5}, 0.35)
+	smoothMove(creditsStroke, {Transparency = 0.75}, 0.35)
+	smoothMove(sliderBg, {BackgroundTransparency = 0.6}, 0.35)
+	smoothMove(sliderKnob, {BackgroundTransparency = 0}, 0.35)
+	smoothMove(sliderKnobStroke, {Transparency = 0}, 0.35)
+	smoothMove(keybindBtn, {BackgroundTransparency = 0.5}, 0.35)
+	smoothMove(spamKeyBtn, {BackgroundTransparency = 0.5}, 0.35)
+	smoothMove(closeBtn, {BackgroundTransparency = 0.78}, 0.35)
+	smoothMove(dragBar, {BackgroundTransparency = 0.95}, 0.35)
+	for _, child in ipairs(draggable:GetDescendants()) do
+		if child:IsA("TextLabel") or child:IsA("TextButton") then
+			smoothMove(child, {TextTransparency = 0}, 0.3)
+		end
+	end
+	smoothMove(toggleIcon, {Rotation = 0}, 0.3)
+end
+
+local function fadeOutAll()
+	smoothMove(draggable, {BackgroundTransparency = 1, Position = UDim2.new(0.35, 0, 0.12, -200)}, 0.28, Enum.EasingStyle.Quart)
+	smoothMove(draggableStroke, {Transparency = 1}, 0.28)
+	smoothMove(divider1, {BackgroundTransparency = 1}, 0.28)
+	smoothMove(CPSbox, {BackgroundTransparency = 1}, 0.28)
+	smoothMove(CPSboxStroke, {Transparency = 1}, 0.28)
+	smoothMove(clicking, {BackgroundTransparency = 1}, 0.28)
+	smoothMove(clickingStroke, {Transparency = 1}, 0.28)
+	smoothMove(setkeybind, {BackgroundTransparency = 1}, 0.28)
+	smoothMove(setkeybindStroke, {Transparency = 1}, 0.28)
+	smoothMove(progressBg, {BackgroundTransparency = 1}, 0.28)
+	smoothMove(creditsFrame, {BackgroundTransparency = 1}, 0.28)
+	smoothMove(creditsStroke, {Transparency = 1}, 0.28)
+	smoothMove(sliderBg, {BackgroundTransparency = 1}, 0.28)
+	smoothMove(sliderKnob, {BackgroundTransparency = 1}, 0.28)
+	smoothMove(sliderKnobStroke, {Transparency = 1}, 0.28)
+	smoothMove(keybindBtn, {BackgroundTransparency = 1}, 0.28)
+	smoothMove(spamKeyBtn, {BackgroundTransparency = 1}, 0.28)
+	smoothMove(closeBtn, {BackgroundTransparency = 1}, 0.28)
+	smoothMove(dragBar, {BackgroundTransparency = 1}, 0.28)
+	for _, child in ipairs(draggable:GetDescendants()) do
+		if child:IsA("TextLabel") or child:IsA("TextButton") then
+			smoothMove(child, {TextTransparency = 1}, 0.2)
+		end
+	end
+	smoothMove(toggleIcon, {Rotation = 180}, 0.28)
+end
+
+local function toggleMenuVisibility(shouldBeVisible)
+	menuVisible = shouldBeVisible
+	if shouldBeVisible then
+		draggable.Visible = true
+		fadeInAll()
+	else
+		fadeOutAll()
+		task.wait(0.28)
+		draggable.Visible = false
+	end
+end
+
+local function initializeGUI()
+	draggable.Visible = true
+	draggable.BackgroundTransparency = 1
+	draggable.Position = UDim2.new(0.35, 0, 0.12, -200)
+	updateSliderVisuals()
+	fadeInAll()
+end
+
+initializeGUI()
+-- -------------------------------------------
