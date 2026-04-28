@@ -26,3 +26,8 @@ not a hold toggle where you press the keybind and it just spams the parry button
 pretty annoying, right?
 
 so i made it so it stops when you let go of the keybind.
+
+
+- SCRIPT
+
+- https://scriptblox.com/script/Universal-Script-MacroBall-207339
