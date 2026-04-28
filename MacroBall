@@ -15,8 +15,15 @@ xX_mainGuiHolder_Xx.ResetOnSpawn = false
 xX_mainGuiHolder_Xx.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local blockButton = nil
+local blockClickX, blockClickY = 0, 0
 pcall(function()
-	blockButton = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("Hotbar"):WaitForChild("Block", 5)
+	blockButton = LocalPlayer.PlayerGui.Hotbar.Block
+	if blockButton and blockButton:IsA("GuiObject") then
+		local absPos = blockButton.AbsolutePosition
+		local absSize = blockButton.AbsoluteSize
+		blockClickX = absPos.X + (absSize.X / 2)
+		blockClickY = absPos.Y + (absSize.Y / 2)
+	end
 end)
 
 local function smoothMove(obj, props, dur, style)
@@ -107,7 +114,7 @@ descLabel.BackgroundTransparency = 1
 descLabel.Position = UDim2.new(0, 16, 0, 40)
 descLabel.Size = UDim2.new(1, -32, 0, 14)
 descLabel.Font = Enum.Font.GothamSemibold
-descLabel.Text = "v1 | decent macro"
+descLabel.Text = "v1 | block clicker"
 descLabel.TextColor3 = Color3.fromRGB(170, 170, 200)
 descLabel.TextTransparency = 1
 descLabel.TextSize = 10
@@ -281,7 +288,7 @@ setkeybind.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
 setkeybind.BackgroundTransparency = 1
 setkeybind.BorderSizePixel = 0
 setkeybind.Position = UDim2.new(0, 16, 0, 168)
-setkeybind.Size = UDim2.new(1, -32, 0, 50)
+setkeybind.Size = UDim2.new(1, -32, 0, 38)
 setkeybind.ZIndex = 3
 addCorner(setkeybind, 8)
 local setkeybindStroke = Instance.new("UIStroke")
@@ -297,7 +304,7 @@ keybindLabel.BackgroundTransparency = 1
 keybindLabel.Position = UDim2.new(0, 12, 0, 6)
 keybindLabel.Size = UDim2.new(1, -24, 0, 14)
 keybindLabel.Font = Enum.Font.GothamSemibold
-keybindLabel.Text = "Clash Key"
+keybindLabel.Text = "Toggle Key"
 keybindLabel.TextColor3 = Color3.fromRGB(180, 180, 210)
 keybindLabel.TextTransparency = 1
 keybindLabel.TextSize = 11
@@ -320,43 +327,13 @@ keybindBtn.TextSize = 11
 keybindBtn.ZIndex = 5
 addCorner(keybindBtn, 5)
 
-local spamMethodLabel = Instance.new("TextLabel")
-spamMethodLabel.Name = "spamMethodLabel"
-spamMethodLabel.Parent = setkeybind
-spamMethodLabel.BackgroundTransparency = 1
-spamMethodLabel.Position = UDim2.new(0, 120, 0, 6)
-spamMethodLabel.Size = UDim2.new(0, 100, 0, 14)
-spamMethodLabel.Font = Enum.Font.GothamSemibold
-spamMethodLabel.Text = "Spam Key"
-spamMethodLabel.TextColor3 = Color3.fromRGB(180, 180, 210)
-spamMethodLabel.TextTransparency = 1
-spamMethodLabel.TextSize = 11
-spamMethodLabel.TextXAlignment = Enum.TextXAlignment.Left
-spamMethodLabel.ZIndex = 5
-
-local spamKeyBtn = Instance.new("TextButton")
-spamKeyBtn.Name = "spamKeyBtn"
-spamKeyBtn.Parent = setkeybind
-spamKeyBtn.BackgroundColor3 = Color3.fromRGB(100, 60, 60)
-spamKeyBtn.BackgroundTransparency = 1
-spamKeyBtn.BorderSizePixel = 0
-spamKeyBtn.Position = UDim2.new(0, 120, 0, 24)
-spamKeyBtn.Size = UDim2.new(0, 100, 0, 18)
-spamKeyBtn.Text = "Mouse1"
-spamKeyBtn.Font = Enum.Font.GothamBold
-spamKeyBtn.TextColor3 = Color3.fromRGB(200, 200, 230)
-spamKeyBtn.TextTransparency = 1
-spamKeyBtn.TextSize = 11
-spamKeyBtn.ZIndex = 5
-addCorner(spamKeyBtn, 5)
-
 local progressBg = Instance.new("Frame")
 progressBg.Name = "progressBackground"
 progressBg.Parent = draggable
 progressBg.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
 progressBg.BackgroundTransparency = 1
 progressBg.BorderSizePixel = 0
-progressBg.Position = UDim2.new(0, 16, 0, 226)
+progressBg.Position = UDim2.new(0, 16, 0, 214)
 progressBg.Size = UDim2.new(1, -32, 0, 5)
 progressBg.ZIndex = 5
 addCorner(progressBg, 14)
@@ -376,7 +353,7 @@ creditsFrame.Parent = draggable
 creditsFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
 creditsFrame.BackgroundTransparency = 1
 creditsFrame.BorderSizePixel = 0
-creditsFrame.Position = UDim2.new(0, 16, 0, 240)
+creditsFrame.Position = UDim2.new(0, 16, 0, 228)
 creditsFrame.Size = UDim2.new(1, -32, 0, 44)
 creditsFrame.ZIndex = 3
 addCorner(creditsFrame, 8)
@@ -418,7 +395,7 @@ local bottomBar = Instance.new("Frame")
 bottomBar.Name = "bottomInfo"
 bottomBar.Parent = draggable
 bottomBar.BackgroundTransparency = 1
-bottomBar.Position = UDim2.new(0, 16, 0, 292)
+bottomBar.Position = UDim2.new(0, 16, 0, 280)
 bottomBar.Size = UDim2.new(1, -32, 0, 18)
 bottomBar.ZIndex = 4
 
@@ -429,7 +406,7 @@ warningLabel.BackgroundTransparency = 1
 warningLabel.Position = UDim2.new(0, 0, 0, 0)
 warningLabel.Size = UDim2.new(0.65, 0, 1, 0)
 warningLabel.Font = Enum.Font.Gotham
-warningLabel.Text = "currently making this better!"
+warningLabel.Text = "press F to toggle"
 warningLabel.TextColor3 = Color3.fromRGB(190, 140, 100)
 warningLabel.TextTransparency = 1
 warningLabel.TextSize = 9
@@ -493,9 +470,7 @@ toggleIcon.ZIndex = 11
 local menuVisible = true
 local isClickingActive = false
 local activationKey = Enum.KeyCode.F
-local spamTarget = "Mouse1"
 local waitingForBind = nil
-local waitingForSpamBind = nil
 local heartbeatConn = nil
 local renderConn = nil
 local preRenderConn = nil
@@ -512,14 +487,12 @@ local nextRenderTime = 0
 local nextPreRenderTime = 0
 local maxClicksPerFrame = 100
 local posCycleIndex = 0
-local buttonCycleIndex = 0
 
 local targetCPS = 700
 local minCPS = 1
 local maxCPS = 2500
 
 local isDraggingSlider = false
-local mousePosCache = Vector2.new(0, 0)
 
 local posOffsets = {
 	Vector2.new(0, 0), Vector2.new(1, 0), Vector2.new(0, 1), Vector2.new(1, 1),
@@ -528,76 +501,21 @@ local posOffsets = {
 	Vector2.new(-1, 1), Vector2.new(1, -1), Vector2.new(-2, -1), Vector2.new(2, -1)
 }
 
-UIS.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		mousePosCache = input.Position
-	end
-end)
-
-local function fireVIM(mX, mY, btn)
+local function fireBlockClick()
+	if blockClickX == 0 and blockClickY == 0 then return end
+	posCycleIndex = (posCycleIndex % 16) + 1
+	local offset = posOffsets[posCycleIndex]
+	local mX = blockClickX + offset.X
+	local mY = blockClickY + offset.Y
 	pcall(function()
-		VIM:SendMouseButtonEvent(mX, mY, btn, true, game, 0)
-		VIM:SendMouseButtonEvent(mX, mY, btn, false, game, 0)
+		VIM:SendMouseButtonEvent(mX, mY, 0, true, game, 0)
+		VIM:SendMouseButtonEvent(mX, mY, 0, false, game, 0)
 	end)
 end
 
-local function fireGUI()
-	if not blockButton then return end
-	if not blockButton:IsA("TextButton") then return end
-	pcall(function()
-		blockButton:FireServer({
-			UserInputType = Enum.UserInputType.MouseButton1,
-			UserInputState = Enum.UserInputState.Begin,
-			Position = mousePosCache
-		})
-	end)
-end
-
-local function fireCAS()
-	pcall(function()
-		CAS:FireAction("macroClickAction_CAS", Enum.UserInputState.Begin, nil)
-		CAS:FireAction("macroClickAction_CAS", Enum.UserInputState.End, nil)
-	end)
-end
-
-local function fireSpamTarget()
-	local mX = mousePosCache.X
-	local mY = mousePosCache.Y
-	if spamTarget == "Mouse1" then
-		fireVIM(mX, mY, 0)
-	elseif spamTarget == "Mouse2" then
-		fireVIM(mX, mY, 2)
-	else
-		pcall(function()
-			VIM:SendKeyEvent(true, spamTarget, false, game)
-			VIM:SendKeyEvent(false, spamTarget, false, game)
-		end)
-	end
-end
-
-local function burstVIM(count)
-	local mX = mousePosCache.X
-	local mY = mousePosCache.Y
+local function burstBlockClicks(count)
 	for i = 1, count do
-		posCycleIndex = (posCycleIndex % 16) + 1
-		buttonCycleIndex = (buttonCycleIndex % 2) + 1
-		local btn = buttonCycleIndex == 1 and 0 or 2
-		local offset = posOffsets[posCycleIndex]
-		fireVIM(mX + offset.X, mY + offset.Y, btn)
-		totalClicks = totalClicks + 1
-	end
-end
-
-local function burstCAS(count)
-	for i = 1, count do
-		fireCAS()
-		totalClicks = totalClicks + 1
-	end
-end
-
-local function burstGUI(count)
-	for i = 1, count do
-		fireGUI()
+		fireBlockClick()
 		totalClicks = totalClicks + 1
 	end
 end
@@ -665,31 +583,6 @@ keybindBtn.MouseButton1Click:Connect(function()
 	end)
 end)
 
-spamKeyBtn.MouseButton1Click:Connect(function()
-	waitingForSpamBind = true
-	spamKeyBtn.Text = "..."
-	spamKeyBtn.TextColor3 = Color3.fromRGB(255, 200, 100)
-	local connection
-	connection = UIS.InputBegan:Connect(function(input, gameProcessed)
-		if gameProcessed then return end
-		if waitingForSpamBind then
-			if input.UserInputType == Enum.UserInputType.Keyboard then
-				spamTarget = input.KeyCode
-				spamKeyBtn.Text = input.KeyCode.Name
-			elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-				spamTarget = "Mouse1"
-				spamKeyBtn.Text = "Mouse1"
-			elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-				spamTarget = "Mouse2"
-				spamKeyBtn.Text = "Mouse2"
-			end
-			spamKeyBtn.TextColor3 = Color3.fromRGB(200, 200, 230)
-			waitingForSpamBind = nil
-			connection:Disconnect()
-		end
-	end)
-end)
-
 local function refreshCPSDisplay()
 	local timeNow = tick()
 	local deltaTime = timeNow - lastTimeChecked
@@ -740,9 +633,7 @@ local function heartbeatBurst()
 		local interval = 1.0 / (targetCPS / 3)
 		local needed = math.floor(diff / interval) + 1
 		needed = math.clamp(needed, 1, maxClicksPerFrame)
-		burstVIM(needed)
-		fireSpamTarget()
-		totalClicks = totalClicks + 1
+		burstBlockClicks(needed)
 		nextHeartbeatTime = nextHeartbeatTime + (needed * interval)
 		if nextHeartbeatTime <= now then
 			nextHeartbeatTime = now + interval
@@ -758,7 +649,7 @@ local function renderBurst()
 		local interval = 1.0 / (targetCPS / 3)
 		local needed = math.floor(diff / interval) + 1
 		needed = math.clamp(needed, 1, maxClicksPerFrame)
-		burstCAS(needed)
+		burstBlockClicks(needed)
 		nextRenderTime = nextRenderTime + (needed * interval)
 		if nextRenderTime <= now then
 			nextRenderTime = now + interval
@@ -774,7 +665,7 @@ local function preRenderBurst()
 		local interval = 1.0 / (targetCPS / 3)
 		local needed = math.floor(diff / interval) + 1
 		needed = math.clamp(needed, 1, maxClicksPerFrame)
-		burstGUI(needed)
+		burstBlockClicks(needed)
 		nextPreRenderTime = nextPreRenderTime + (needed * interval)
 		if nextPreRenderTime <= now then
 			nextPreRenderTime = now + interval
@@ -794,7 +685,6 @@ local function startTheClicking()
 	nextRenderTime = tick()
 	nextPreRenderTime = tick()
 	posCycleIndex = 0
-	buttonCycleIndex = 0
 	maxClicksPerFrame = math.clamp(math.ceil(targetCPS / 18), 1, 150)
 	cpsValue.Text = "0"
 	cpsValue.TextColor3 = Color3.fromRGB(100, 190, 255)
@@ -919,7 +809,6 @@ local function fadeInAll()
 	smoothMove(sliderKnob, {BackgroundTransparency = 0}, 0.35)
 	smoothMove(sliderKnobStroke, {Transparency = 0}, 0.35)
 	smoothMove(keybindBtn, {BackgroundTransparency = 0.5}, 0.35)
-	smoothMove(spamKeyBtn, {BackgroundTransparency = 0.5}, 0.35)
 	smoothMove(closeBtn, {BackgroundTransparency = 0.78}, 0.35)
 	smoothMove(dragBar, {BackgroundTransparency = 0.95}, 0.35)
 	for _, child in ipairs(draggable:GetDescendants()) do
@@ -947,7 +836,6 @@ local function fadeOutAll()
 	smoothMove(sliderKnob, {BackgroundTransparency = 1}, 0.28)
 	smoothMove(sliderKnobStroke, {Transparency = 1}, 0.28)
 	smoothMove(keybindBtn, {BackgroundTransparency = 1}, 0.28)
-	smoothMove(spamKeyBtn, {BackgroundTransparency = 1}, 0.28)
 	smoothMove(closeBtn, {BackgroundTransparency = 1}, 0.28)
 	smoothMove(dragBar, {BackgroundTransparency = 1}, 0.28)
 	for _, child in ipairs(draggable:GetDescendants()) do
