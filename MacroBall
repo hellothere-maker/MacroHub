@@ -1,21 +1,24 @@
 -- -------------------------------------------
 local Players = game:GetService("Players")
-local CAS = game:GetService("ContextActionService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
-local UIS = game:GetService("UserInputService")
-local VIM = game:GetService("VirtualInputManager")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 local LocalPlayer = Players.LocalPlayer
 
+-- -------------------------------------------
 local xX_mainGuiHolder_Xx = Instance.new("ScreenGui")
 xX_mainGuiHolder_Xx.Name = "macroball_cc"
 xX_mainGuiHolder_Xx.Parent = CoreGui
 xX_mainGuiHolder_Xx.ResetOnSpawn = false
 xX_mainGuiHolder_Xx.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+-- -------------------------------------------
 local blockButton = nil
 local blockClickX, blockClickY = 0, 0
+
+-- -------------------------------------------
 pcall(function()
 	blockButton = LocalPlayer.PlayerGui.Hotbar.Block
 	if blockButton and blockButton:IsA("GuiObject") then
@@ -23,9 +26,11 @@ pcall(function()
 		local absSize = blockButton.AbsoluteSize
 		blockClickX = absPos.X + (absSize.X / 2)
 		blockClickY = absPos.Y + (absSize.Y / 2)
+		print("found SelectionUIBlock")
 	end
 end)
 
+-- -------------------------------------------
 local function smoothMove(obj, props, dur, style)
 	local tInfo = TweenInfo.new(dur, style or Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
 	local tweens = TweenService:Create(obj, tInfo, props)
@@ -33,12 +38,14 @@ local function smoothMove(obj, props, dur, style)
 	return tweens
 end
 
+-- -------------------------------------------
 local function addCorner(obj, radius)
 	local c = Instance.new("UICorner")
 	c.CornerRadius = UDim.new(0, radius)
 	c.Parent = obj
 end
 
+-- -------------------------------------------
 local draggable = Instance.new("Frame")
 draggable.Name = "draggable"
 draggable.Parent = xX_mainGuiHolder_Xx
@@ -50,12 +57,14 @@ draggable.Size = UDim2.new(0, 290, 0, 320)
 draggable.ClipsDescendants = false
 addCorner(draggable, 10)
 
+-- -------------------------------------------
 local draggableStroke = Instance.new("UIStroke")
 draggableStroke.Thickness = 1.2
 draggableStroke.Transparency = 1
 draggableStroke.Color = Color3.fromRGB(255, 255, 255)
 draggableStroke.Parent = draggable
 
+-- -------------------------------------------
 local draggableShadow = Instance.new("ImageLabel")
 draggableShadow.Name = "shadow"
 draggableShadow.Parent = draggable
@@ -69,6 +78,7 @@ draggableShadow.ScaleType = Enum.ScaleType.Slice
 draggableShadow.SliceCenter = Rect.new(49, 49, 49, 49)
 draggableShadow.ZIndex = -1
 
+-- -------------------------------------------
 local dragBar = Instance.new("Frame")
 dragBar.Name = "dragHeader"
 dragBar.Parent = draggable
@@ -77,7 +87,9 @@ dragBar.BackgroundTransparency = 1
 dragBar.BorderSizePixel = 0
 dragBar.Size = UDim2.new(1, 0, 0, 32)
 dragBar.ZIndex = 3
+addCorner(dragBar, 10)
 
+-- -------------------------------------------
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "macroball.cc"
 titleLabel.Parent = dragBar
@@ -92,11 +104,13 @@ titleLabel.TextSize = 13
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.ZIndex = 5
 
+-- -------------------------------------------
 local closeBtn = Instance.new("TextButton")
 closeBtn.Name = "closeBtn"
 closeBtn.Parent = dragBar
 closeBtn.BackgroundColor3 = Color3.fromRGB(255, 55, 55)
 closeBtn.BackgroundTransparency = 1
+closeBtn.BorderSizePixel = 0
 closeBtn.Position = UDim2.new(1, -30, 0.5, -9)
 closeBtn.Size = UDim2.new(0, 22, 0, 18)
 closeBtn.Text = "x"
@@ -107,6 +121,17 @@ closeBtn.TextSize = 12
 closeBtn.ZIndex = 5
 addCorner(closeBtn, 5)
 
+-- -------------------------------------------
+closeBtn.MouseEnter:Connect(function()
+	smoothMove(closeBtn, {BackgroundTransparency = 0.55, Size = UDim2.new(0, 24, 0, 20), Position = UDim2.new(1, -32, 0.5, -10), Rotation = 8}, 0.12, Enum.EasingStyle.Back)
+end)
+
+-- -------------------------------------------
+closeBtn.MouseLeave:Connect(function()
+	smoothMove(closeBtn, {BackgroundTransparency = 1, Size = UDim2.new(0, 22, 0, 18), Position = UDim2.new(1, -30, 0.5, -9), Rotation = 0}, 0.12, Enum.EasingStyle.Back)
+end)
+
+-- -------------------------------------------
 local descLabel = Instance.new("TextLabel")
 descLabel.Name = "descText"
 descLabel.Parent = draggable
@@ -121,6 +146,7 @@ descLabel.TextSize = 10
 descLabel.TextXAlignment = Enum.TextXAlignment.Left
 descLabel.ZIndex = 4
 
+-- -------------------------------------------
 local divider1 = Instance.new("Frame")
 divider1.Name = "divider"
 divider1.Parent = draggable
@@ -131,6 +157,7 @@ divider1.Position = UDim2.new(0, 16, 0, 58)
 divider1.Size = UDim2.new(1, -32, 0, 1)
 divider1.ZIndex = 4
 
+-- -------------------------------------------
 local CPSbox = Instance.new("Frame")
 CPSbox.Name = "CPSbox"
 CPSbox.Parent = draggable
@@ -141,12 +168,15 @@ CPSbox.Position = UDim2.new(0, 16, 0, 66)
 CPSbox.Size = UDim2.new(1, -32, 0, 38)
 CPSbox.ZIndex = 3
 addCorner(CPSbox, 8)
+
+-- -------------------------------------------
 local CPSboxStroke = Instance.new("UIStroke")
 CPSboxStroke.Thickness = 0.8
 CPSboxStroke.Transparency = 1
 CPSboxStroke.Color = Color3.fromRGB(255, 255, 255)
 CPSboxStroke.Parent = CPSbox
 
+-- -------------------------------------------
 local cpsTargetLabel = Instance.new("TextLabel")
 cpsTargetLabel.Name = "cpscounter"
 cpsTargetLabel.Parent = CPSbox
@@ -161,6 +191,7 @@ cpsTargetLabel.TextSize = 10
 cpsTargetLabel.TextXAlignment = Enum.TextXAlignment.Left
 cpsTargetLabel.ZIndex = 5
 
+-- -------------------------------------------
 local cpsActualLabel = Instance.new("TextLabel")
 cpsActualLabel.Name = "calculated_CPS"
 cpsActualLabel.Parent = CPSbox
@@ -175,6 +206,7 @@ cpsActualLabel.TextSize = 10
 cpsActualLabel.TextXAlignment = Enum.TextXAlignment.Left
 cpsActualLabel.ZIndex = 5
 
+-- -------------------------------------------
 local cpsValue = Instance.new("TextLabel")
 cpsValue.Name = "cpsValueDisplay"
 cpsValue.Parent = CPSbox
@@ -189,6 +221,7 @@ cpsValue.TextSize = 18
 cpsValue.TextXAlignment = Enum.TextXAlignment.Right
 cpsValue.ZIndex = 5
 
+-- -------------------------------------------
 local clicking = Instance.new("Frame")
 clicking.Name = "clicking"
 clicking.Parent = draggable
@@ -199,12 +232,15 @@ clicking.Position = UDim2.new(0, 16, 0, 110)
 clicking.Size = UDim2.new(1, -32, 0, 52)
 clicking.ZIndex = 3
 addCorner(clicking, 8)
+
+-- -------------------------------------------
 local clickingStroke = Instance.new("UIStroke")
 clickingStroke.Thickness = 0.8
 clickingStroke.Transparency = 1
 clickingStroke.Color = Color3.fromRGB(255, 255, 255)
 clickingStroke.Parent = clicking
 
+-- -------------------------------------------
 local cpsSliderLabel = Instance.new("TextLabel")
 cpsSliderLabel.Parent = clicking
 cpsSliderLabel.BackgroundTransparency = 1
@@ -218,6 +254,7 @@ cpsSliderLabel.TextSize = 10
 cpsSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
 cpsSliderLabel.ZIndex = 5
 
+-- -------------------------------------------
 local sliderBg = Instance.new("Frame")
 sliderBg.Name = "sliderTrack"
 sliderBg.Parent = clicking
@@ -229,6 +266,7 @@ sliderBg.Size = UDim2.new(1, -24, 0, 5)
 sliderBg.ZIndex = 5
 addCorner(sliderBg, 12)
 
+-- -------------------------------------------
 local sliderFill = Instance.new("Frame")
 sliderFill.Name = "sliderFillBar"
 sliderFill.Parent = sliderBg
@@ -238,6 +276,7 @@ sliderFill.Size = UDim2.new(0.116, 0, 1, 0)
 sliderFill.ZIndex = 6
 addCorner(sliderFill, 12)
 
+-- -------------------------------------------
 local sliderKnob = Instance.new("TextButton")
 sliderKnob.Name = "sliderKnobBtn"
 sliderKnob.Parent = sliderBg
@@ -249,12 +288,15 @@ sliderKnob.Size = UDim2.new(0, 14, 0, 14)
 sliderKnob.Text = ""
 sliderKnob.ZIndex = 7
 addCorner(sliderKnob, 14)
+
+-- -------------------------------------------
 local sliderKnobStroke = Instance.new("UIStroke")
 sliderKnobStroke.Thickness = 1.8
 sliderKnobStroke.Transparency = 1
 sliderKnobStroke.Color = Color3.fromRGB(255, 255, 255)
 sliderKnobStroke.Parent = sliderKnob
 
+-- -------------------------------------------
 local cpsMinText = Instance.new("TextLabel")
 cpsMinText.Parent = clicking
 cpsMinText.BackgroundTransparency = 1
@@ -268,19 +310,21 @@ cpsMinText.TextSize = 8
 cpsMinText.TextXAlignment = Enum.TextXAlignment.Left
 cpsMinText.ZIndex = 5
 
+-- -------------------------------------------
 local cpsMaxText = Instance.new("TextLabel")
 cpsMaxText.Parent = clicking
 cpsMaxText.BackgroundTransparency = 1
 cpsMaxText.Position = UDim2.new(0.7, 0, 0, 36)
 cpsMaxText.Size = UDim2.new(0.3, -12, 0, 12)
 cpsMaxText.Font = Enum.Font.Gotham
-cpsMaxText.Text = "2500"
+cpsMaxText.Text = "6000"
 cpsMaxText.TextColor3 = Color3.fromRGB(110, 110, 140)
 cpsMaxText.TextTransparency = 1
 cpsMaxText.TextSize = 8
 cpsMaxText.TextXAlignment = Enum.TextXAlignment.Right
 cpsMaxText.ZIndex = 5
 
+-- -------------------------------------------
 local setkeybind = Instance.new("Frame")
 setkeybind.Name = "setkeybind"
 setkeybind.Parent = draggable
@@ -288,15 +332,18 @@ setkeybind.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
 setkeybind.BackgroundTransparency = 1
 setkeybind.BorderSizePixel = 0
 setkeybind.Position = UDim2.new(0, 16, 0, 168)
-setkeybind.Size = UDim2.new(1, -32, 0, 38)
+setkeybind.Size = UDim2.new(1, -32, 0, 44)
 setkeybind.ZIndex = 3
 addCorner(setkeybind, 8)
+
+-- -------------------------------------------
 local setkeybindStroke = Instance.new("UIStroke")
 setkeybindStroke.Thickness = 0.8
 setkeybindStroke.Transparency = 1
 setkeybindStroke.Color = Color3.fromRGB(255, 255, 255)
 setkeybindStroke.Parent = setkeybind
 
+-- -------------------------------------------
 local keybindLabel = Instance.new("TextLabel")
 keybindLabel.Name = "keybindTitle"
 keybindLabel.Parent = setkeybind
@@ -311,6 +358,7 @@ keybindLabel.TextSize = 11
 keybindLabel.TextXAlignment = Enum.TextXAlignment.Left
 keybindLabel.ZIndex = 5
 
+-- -------------------------------------------
 local keybindBtn = Instance.new("TextButton")
 keybindBtn.Name = "keybindChanged"
 keybindBtn.Parent = setkeybind
@@ -327,17 +375,29 @@ keybindBtn.TextSize = 11
 keybindBtn.ZIndex = 5
 addCorner(keybindBtn, 5)
 
+-- -------------------------------------------
+keybindBtn.MouseEnter:Connect(function()
+	smoothMove(keybindBtn, {BackgroundTransparency = 0.35, Size = UDim2.new(0, 104, 0, 20), Position = UDim2.new(0, 10, 0, 23), Rotation = -4}, 0.12, Enum.EasingStyle.Back)
+end)
+
+-- -------------------------------------------
+keybindBtn.MouseLeave:Connect(function()
+	smoothMove(keybindBtn, {BackgroundTransparency = 1, Size = UDim2.new(0, 100, 0, 18), Position = UDim2.new(0, 12, 0, 24), Rotation = 0}, 0.12, Enum.EasingStyle.Back)
+end)
+
+-- -------------------------------------------
 local progressBg = Instance.new("Frame")
 progressBg.Name = "progressBackground"
 progressBg.Parent = draggable
 progressBg.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
 progressBg.BackgroundTransparency = 1
 progressBg.BorderSizePixel = 0
-progressBg.Position = UDim2.new(0, 16, 0, 214)
+progressBg.Position = UDim2.new(0, 16, 0, 220)
 progressBg.Size = UDim2.new(1, -32, 0, 5)
 progressBg.ZIndex = 5
 addCorner(progressBg, 14)
 
+-- -------------------------------------------
 local progressFill = Instance.new("Frame")
 progressFill.Name = "progressBarFill"
 progressFill.Parent = progressBg
@@ -347,22 +407,26 @@ progressFill.Size = UDim2.new(0, 0, 1, 0)
 progressFill.ZIndex = 6
 addCorner(progressFill, 14)
 
+-- -------------------------------------------
 local creditsFrame = Instance.new("Frame")
 creditsFrame.Name = "creditsContainer"
 creditsFrame.Parent = draggable
 creditsFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
 creditsFrame.BackgroundTransparency = 1
 creditsFrame.BorderSizePixel = 0
-creditsFrame.Position = UDim2.new(0, 16, 0, 228)
+creditsFrame.Position = UDim2.new(0, 16, 0, 234)
 creditsFrame.Size = UDim2.new(1, -32, 0, 44)
 creditsFrame.ZIndex = 3
 addCorner(creditsFrame, 8)
+
+-- -------------------------------------------
 local creditsStroke = Instance.new("UIStroke")
 creditsStroke.Thickness = 0.8
 creditsStroke.Transparency = 1
 creditsStroke.Color = Color3.fromRGB(255, 255, 255)
 creditsStroke.Parent = creditsFrame
 
+-- -------------------------------------------
 local creditsMainLabel = Instance.new("TextLabel")
 creditsMainLabel.Name = "creditsText"
 creditsMainLabel.Parent = creditsFrame
@@ -377,6 +441,7 @@ creditsMainLabel.TextSize = 11
 creditsMainLabel.TextXAlignment = Enum.TextXAlignment.Center
 creditsMainLabel.ZIndex = 5
 
+-- -------------------------------------------
 local creditsDiscord = Instance.new("TextLabel")
 creditsDiscord.Name = "discordText"
 creditsDiscord.Parent = creditsFrame
@@ -391,14 +456,17 @@ creditsDiscord.TextSize = 9
 creditsDiscord.TextXAlignment = Enum.TextXAlignment.Center
 creditsDiscord.ZIndex = 5
 
+-- -------------------------------------------
 local bottomBar = Instance.new("Frame")
 bottomBar.Name = "bottomInfo"
 bottomBar.Parent = draggable
 bottomBar.BackgroundTransparency = 1
-bottomBar.Position = UDim2.new(0, 16, 0, 280)
+bottomBar.Position = UDim2.new(0, 16, 0, 286)
 bottomBar.Size = UDim2.new(1, -32, 0, 18)
 bottomBar.ZIndex = 4
+addCorner(bottomBar, 4)
 
+-- -------------------------------------------
 local warningLabel = Instance.new("TextLabel")
 warningLabel.Name = "warningLabel"
 warningLabel.Parent = bottomBar
@@ -406,13 +474,14 @@ warningLabel.BackgroundTransparency = 1
 warningLabel.Position = UDim2.new(0, 0, 0, 0)
 warningLabel.Size = UDim2.new(0.65, 0, 1, 0)
 warningLabel.Font = Enum.Font.Gotham
-warningLabel.Text = "press F to toggle"
+warningLabel.Text = "hold F to macroclash!"
 warningLabel.TextColor3 = Color3.fromRGB(190, 140, 100)
 warningLabel.TextTransparency = 1
 warningLabel.TextSize = 9
 warningLabel.TextXAlignment = Enum.TextXAlignment.Left
 warningLabel.ZIndex = 5
 
+-- -------------------------------------------
 local versionLabel = Instance.new("TextLabel")
 versionLabel.Name = "v1"
 versionLabel.Parent = bottomBar
@@ -427,46 +496,96 @@ versionLabel.TextSize = 9
 versionLabel.TextXAlignment = Enum.TextXAlignment.Right
 versionLabel.ZIndex = 5
 
-local toggleBtn = Instance.new("TextButton")
-toggleBtn.Name = "toggleMenuBtn"
-toggleBtn.Parent = xX_mainGuiHolder_Xx
-toggleBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
-toggleBtn.BackgroundTransparency = 0.1
-toggleBtn.BorderSizePixel = 0
-toggleBtn.Position = UDim2.new(0.01, 0, 0.5, -22)
-toggleBtn.Size = UDim2.new(0, 40, 0, 40)
-toggleBtn.Text = ""
-toggleBtn.ZIndex = 10
-addCorner(toggleBtn, 10)
+-- -------------------------------------------
+local confirmPopup = Instance.new("Frame")
+confirmPopup.Name = "confirmPopup"
+confirmPopup.Parent = draggable
+confirmPopup.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+confirmPopup.BackgroundTransparency = 1
+confirmPopup.BorderSizePixel = 0
+confirmPopup.Position = UDim2.new(0.5, -110, 0.5, -30)
+confirmPopup.Size = UDim2.new(0, 220, 0, 60)
+confirmPopup.ZIndex = 20
+confirmPopup.Visible = false
+addCorner(confirmPopup, 8)
 
-local toggleShadow = Instance.new("ImageLabel")
-toggleShadow.Parent = toggleBtn
-toggleShadow.BackgroundTransparency = 1
-toggleShadow.Position = UDim2.new(0, -3, 0, -3)
-toggleShadow.Size = UDim2.new(1, 6, 1, 6)
-toggleShadow.Image = "rbxassetid://6014261993"
-toggleShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-toggleShadow.ImageTransparency = 0.5
-toggleShadow.ScaleType = Enum.ScaleType.Slice
-toggleShadow.SliceCenter = Rect.new(49, 49, 49, 49)
-toggleShadow.ZIndex = 9
+-- -------------------------------------------
+local confirmPopupStroke = Instance.new("UIStroke")
+confirmPopupStroke.Thickness = 1
+confirmPopupStroke.Transparency = 1
+confirmPopupStroke.Color = Color3.fromRGB(255, 80, 80)
+confirmPopupStroke.Parent = confirmPopup
 
-local toggleStroke = Instance.new("UIStroke")
-toggleStroke.Thickness = 1.2
-toggleStroke.Transparency = 0.65
-toggleStroke.Color = Color3.fromRGB(255, 255, 255)
-toggleStroke.Parent = toggleBtn
+-- -------------------------------------------
+local confirmLabel = Instance.new("TextLabel")
+confirmLabel.Name = "confirmLabel"
+confirmLabel.Parent = confirmPopup
+confirmLabel.BackgroundTransparency = 1
+confirmLabel.Position = UDim2.new(0, 10, 0, 8)
+confirmLabel.Size = UDim2.new(1, -20, 0, 16)
+confirmLabel.Font = Enum.Font.GothamSemibold
+confirmLabel.Text = "close macroball?"
+confirmLabel.TextColor3 = Color3.fromRGB(210, 210, 230)
+confirmLabel.TextTransparency = 1
+confirmLabel.TextSize = 11
+confirmLabel.TextXAlignment = Enum.TextXAlignment.Center
+confirmLabel.ZIndex = 22
 
-local toggleIcon = Instance.new("TextLabel")
-toggleIcon.Parent = toggleBtn
-toggleIcon.BackgroundTransparency = 1
-toggleIcon.Size = UDim2.new(1, 0, 1, 0)
-toggleIcon.Font = Enum.Font.GothamBold
-toggleIcon.Text = ">"
-toggleIcon.TextColor3 = Color3.fromRGB(180, 180, 220)
-toggleIcon.TextSize = 17
-toggleIcon.ZIndex = 11
+-- -------------------------------------------
+local confirmYes = Instance.new("TextButton")
+confirmYes.Name = "confirmYes"
+confirmYes.Parent = confirmPopup
+confirmYes.BackgroundColor3 = Color3.fromRGB(60, 200, 80)
+confirmYes.BackgroundTransparency = 1
+confirmYes.BorderSizePixel = 0
+confirmYes.Position = UDim2.new(0, 30, 0, 32)
+confirmYes.Size = UDim2.new(0, 70, 0, 18)
+confirmYes.Text = "yes"
+confirmYes.Font = Enum.Font.GothamBold
+confirmYes.TextColor3 = Color3.fromRGB(255, 255, 255)
+confirmYes.TextTransparency = 1
+confirmYes.TextSize = 10
+confirmYes.ZIndex = 22
+addCorner(confirmYes, 5)
 
+-- -------------------------------------------
+local confirmNo = Instance.new("TextButton")
+confirmNo.Name = "confirmNo"
+confirmNo.Parent = confirmPopup
+confirmNo.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+confirmNo.BackgroundTransparency = 1
+confirmNo.BorderSizePixel = 0
+confirmNo.Position = UDim2.new(0, 120, 0, 32)
+confirmNo.Size = UDim2.new(0, 70, 0, 18)
+confirmNo.Text = "no"
+confirmNo.Font = Enum.Font.GothamBold
+confirmNo.TextColor3 = Color3.fromRGB(255, 255, 255)
+confirmNo.TextTransparency = 1
+confirmNo.TextSize = 10
+confirmNo.ZIndex = 22
+addCorner(confirmNo, 5)
+
+-- -------------------------------------------
+confirmYes.MouseEnter:Connect(function()
+	smoothMove(confirmYes, {BackgroundTransparency = 0.2, Rotation = -5}, 0.1)
+end)
+
+-- -------------------------------------------
+confirmYes.MouseLeave:Connect(function()
+	smoothMove(confirmYes, {BackgroundTransparency = 1, Rotation = 0}, 0.1)
+end)
+
+-- -------------------------------------------
+confirmNo.MouseEnter:Connect(function()
+	smoothMove(confirmNo, {BackgroundTransparency = 0.2, Rotation = 5}, 0.1)
+end)
+
+-- -------------------------------------------
+confirmNo.MouseLeave:Connect(function()
+	smoothMove(confirmNo, {BackgroundTransparency = 1, Rotation = 0}, 0.1)
+end)
+
+-- -------------------------------------------
 local menuVisible = true
 local isClickingActive = false
 local activationKey = Enum.KeyCode.F
@@ -475,8 +594,8 @@ local heartbeatConn = nil
 local renderConn = nil
 local preRenderConn = nil
 local cpsUpdaterThread = nil
-local clickActionName = "macroClickAction"
 
+-- -------------------------------------------
 local totalClicks = 0
 local lastTimeChecked = tick()
 local calculatedCPS = 0
@@ -488,12 +607,15 @@ local nextPreRenderTime = 0
 local maxClicksPerFrame = 100
 local posCycleIndex = 0
 
+-- -------------------------------------------
 local targetCPS = 700
 local minCPS = 1
-local maxCPS = 2500
+local maxCPS = 6000
 
+-- -------------------------------------------
 local isDraggingSlider = false
 
+-- -------------------------------------------
 local posOffsets = {
 	Vector2.new(0, 0), Vector2.new(1, 0), Vector2.new(0, 1), Vector2.new(1, 1),
 	Vector2.new(-1, 0), Vector2.new(0, -1), Vector2.new(-1, -1), Vector2.new(2, 0),
@@ -501,6 +623,7 @@ local posOffsets = {
 	Vector2.new(-1, 1), Vector2.new(1, -1), Vector2.new(-2, -1), Vector2.new(2, -1)
 }
 
+-- -------------------------------------------
 local function fireBlockClick()
 	if blockClickX == 0 and blockClickY == 0 then return end
 	posCycleIndex = (posCycleIndex % 16) + 1
@@ -508,11 +631,12 @@ local function fireBlockClick()
 	local mX = blockClickX + offset.X
 	local mY = blockClickY + offset.Y
 	pcall(function()
-		VIM:SendMouseButtonEvent(mX, mY, 0, true, game, 0)
-		VIM:SendMouseButtonEvent(mX, mY, 0, false, game, 0)
+		VirtualInputManager:SendMouseButtonEvent(mX, mY, 0, true, game, 0)
+		VirtualInputManager:SendMouseButtonEvent(mX, mY, 0, false, game, 0)
 	end)
 end
 
+-- -------------------------------------------
 local function burstBlockClicks(count)
 	for i = 1, count do
 		fireBlockClick()
@@ -520,6 +644,7 @@ local function burstBlockClicks(count)
 	end
 end
 
+-- -------------------------------------------
 local function updateSliderVisuals()
 	local percent = (targetCPS - minCPS) / (maxCPS - minCPS)
 	sliderFill.Size = UDim2.new(percent, 0, 1, 0)
@@ -527,8 +652,9 @@ local function updateSliderVisuals()
 	cpsTargetLabel.Text = "target: " .. tostring(targetCPS)
 end
 
+-- -------------------------------------------
 local function handleSliderDrag()
-	local mousePos = UIS:GetMouseLocation()
+	local mousePos = UserInputService:GetMouseLocation()
 	local sliderAbsPos = sliderBg.AbsolutePosition
 	local sliderAbsSize = sliderBg.AbsoluteSize
 	local rawWidth = sliderAbsSize.X
@@ -540,23 +666,27 @@ local function handleSliderDrag()
 	updateSliderVisuals()
 end
 
+-- -------------------------------------------
 sliderKnob.MouseButton1Down:Connect(function()
 	isDraggingSlider = true
 	handleSliderDrag()
 end)
 
-UIS.InputEnded:Connect(function(input)
+-- -------------------------------------------
+UserInputService.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		isDraggingSlider = false
 	end
 end)
 
-UIS.InputChanged:Connect(function(input)
+-- -------------------------------------------
+UserInputService.InputChanged:Connect(function(input)
 	if isDraggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
 		handleSliderDrag()
 	end
 end)
 
+-- -------------------------------------------
 sliderBg.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		isDraggingSlider = true
@@ -564,12 +694,13 @@ sliderBg.InputBegan:Connect(function(input)
 	end
 end)
 
+-- -------------------------------------------
 keybindBtn.MouseButton1Click:Connect(function()
 	waitingForBind = "activation"
 	keybindBtn.Text = "..."
 	keybindBtn.TextColor3 = Color3.fromRGB(255, 200, 100)
 	local connection
-	connection = UIS.InputBegan:Connect(function(input, gameProcessed)
+	connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		if gameProcessed then return end
 		if waitingForBind == "activation" and input.UserInputType == Enum.UserInputType.Keyboard then
 			activationKey = input.KeyCode
@@ -577,12 +708,11 @@ keybindBtn.MouseButton1Click:Connect(function()
 			keybindBtn.TextColor3 = Color3.fromRGB(200, 200, 230)
 			waitingForBind = nil
 			connection:Disconnect()
-			CAS:UnbindAction(clickActionName)
-			bindClickAction()
 		end
 	end)
 end)
 
+-- -------------------------------------------
 local function refreshCPSDisplay()
 	local timeNow = tick()
 	local deltaTime = timeNow - lastTimeChecked
@@ -616,6 +746,7 @@ local function refreshCPSDisplay()
 	end
 end
 
+-- -------------------------------------------
 local function cpsUpdateLoopFunction()
 	while isClickingActive do
 		refreshCPSDisplay()
@@ -625,6 +756,7 @@ local function cpsUpdateLoopFunction()
 	end
 end
 
+-- -------------------------------------------
 local function heartbeatBurst()
 	if not isClickingActive then return end
 	local now = tick()
@@ -641,6 +773,7 @@ local function heartbeatBurst()
 	end
 end
 
+-- -------------------------------------------
 local function renderBurst()
 	if not isClickingActive then return end
 	local now = tick()
@@ -657,6 +790,7 @@ local function renderBurst()
 	end
 end
 
+-- -------------------------------------------
 local function preRenderBurst()
 	if not isClickingActive then return end
 	local now = tick()
@@ -673,6 +807,7 @@ local function preRenderBurst()
 	end
 end
 
+-- -------------------------------------------
 local function startTheClicking()
 	if isClickingActive then return end
 	isClickingActive = true
@@ -695,6 +830,7 @@ local function startTheClicking()
 	smoothMove(draggableStroke, {Transparency = 0.3, Color = Color3.fromRGB(100, 190, 255)}, 0.08)
 end
 
+-- -------------------------------------------
 local function stopTheClicking()
 	if not isClickingActive then return end
 	isClickingActive = false
@@ -708,23 +844,26 @@ local function stopTheClicking()
 	smoothMove(draggableStroke, {Transparency = 0.7, Color = Color3.fromRGB(255, 255, 255)}, 0.15)
 end
 
-local function onMacroAction(actionName, inputState, inputObject)
-	if inputState == Enum.UserInputState.Begin then
+-- -------------------------------------------
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == activationKey then
 		startTheClicking()
-	elseif inputState == Enum.UserInputState.End then
+	end
+end)
+
+-- -------------------------------------------
+UserInputService.InputEnded:Connect(function(input)
+	if input.KeyCode == activationKey then
 		stopTheClicking()
 	end
-end
+end)
 
-local function bindClickAction()
-	CAS:BindAction(clickActionName, onMacroAction, false, activationKey)
-end
-
-bindClickAction()
-
+-- -------------------------------------------
 local isDraggingFrame = false
 local dragStartPos, frameStartPos
 
+-- -------------------------------------------
 dragBar.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		isDraggingFrame = true
@@ -734,6 +873,7 @@ dragBar.InputBegan:Connect(function(input)
 	end
 end)
 
+-- -------------------------------------------
 dragBar.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 and isDraggingFrame then
 		isDraggingFrame = false
@@ -741,7 +881,8 @@ dragBar.InputEnded:Connect(function(input)
 	end
 end)
 
-UIS.InputChanged:Connect(function(input)
+-- -------------------------------------------
+UserInputService.InputChanged:Connect(function(input)
 	if isDraggingFrame and input.UserInputType == Enum.UserInputType.MouseMovement then
 		local movementDiff = input.Position - dragStartPos
 		draggable.Position = UDim2.new(
@@ -753,45 +894,80 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
-local isDraggingToggle = false
-local toggleDragStart, toggleStartPos
+-- -------------------------------------------
+local function showConfirmPopup()
+	confirmPopup.Visible = true
+	smoothMove(confirmPopup, {BackgroundTransparency = 0.4}, 0.2)
+	smoothMove(confirmPopupStroke, {Transparency = 0.3}, 0.2)
+	smoothMove(confirmLabel, {TextTransparency = 0}, 0.2)
+	smoothMove(confirmYes, {TextTransparency = 0, BackgroundTransparency = 1}, 0.2)
+	smoothMove(confirmNo, {TextTransparency = 0, BackgroundTransparency = 1}, 0.2)
+end
 
-toggleBtn.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		isDraggingToggle = true
-		toggleDragStart = input.Position
-		toggleStartPos = toggleBtn.Position
-		smoothMove(toggleBtn, {BackgroundTransparency = 0.05}, 0.08)
-	end
-end)
+-- -------------------------------------------
+local function hideConfirmPopup()
+	smoothMove(confirmPopup, {BackgroundTransparency = 1}, 0.15)
+	smoothMove(confirmPopupStroke, {Transparency = 1}, 0.15)
+	smoothMove(confirmLabel, {TextTransparency = 1}, 0.15)
+	smoothMove(confirmYes, {TextTransparency = 1, BackgroundTransparency = 1}, 0.15)
+	smoothMove(confirmNo, {TextTransparency = 1, BackgroundTransparency = 1}, 0.15)
+	task.wait(0.15)
+	confirmPopup.Visible = false
+end
 
-toggleBtn.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		if isDraggingToggle then
-			isDraggingToggle = false
-			smoothMove(toggleBtn, {BackgroundTransparency = 0.1}, 0.08)
-			return
-		end
-		toggleMenuVisibility(not menuVisible)
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if isDraggingToggle and input.UserInputType == Enum.UserInputType.MouseMovement then
-		local movementDiff = input.Position - toggleDragStart
-		toggleBtn.Position = UDim2.new(
-			toggleStartPos.X.Scale,
-			toggleStartPos.X.Offset + movementDiff.X,
-			toggleStartPos.Y.Scale,
-			toggleStartPos.Y.Offset + movementDiff.Y
-		)
-	end
-end)
-
+-- -------------------------------------------
 closeBtn.MouseButton1Click:Connect(function()
-	toggleMenuVisibility(false)
+	showConfirmPopup()
 end)
 
+-- -------------------------------------------
+confirmYes.MouseButton1Click:Connect(function()
+	hideConfirmPopup()
+	task.wait(0.15)
+	draggable.Visible = false
+	menuVisible = false
+end)
+
+-- -------------------------------------------
+confirmNo.MouseButton1Click:Connect(function()
+	smoothMove(confirmPopup, {BackgroundTransparency = 1}, 0.2)
+	smoothMove(confirmPopupStroke, {Transparency = 1}, 0.2)
+	smoothMove(confirmLabel, {TextTransparency = 1}, 0.2)
+	smoothMove(confirmYes, {TextTransparency = 1, BackgroundTransparency = 1}, 0.2)
+	smoothMove(confirmNo, {TextTransparency = 1, BackgroundTransparency = 1}, 0.2)
+	task.wait(0.2)
+	confirmPopup.Visible = false
+	smoothMove(draggable, {BackgroundTransparency = 1, Position = UDim2.new(0.35, 0, 0.12, -200)}, 0.25, Enum.EasingStyle.Quart)
+	smoothMove(draggableStroke, {Transparency = 1}, 0.25)
+	smoothMove(divider1, {BackgroundTransparency = 1}, 0.25)
+	smoothMove(CPSbox, {BackgroundTransparency = 1}, 0.25)
+	smoothMove(CPSboxStroke, {Transparency = 1}, 0.25)
+	smoothMove(clicking, {BackgroundTransparency = 1}, 0.25)
+	smoothMove(clickingStroke, {Transparency = 1}, 0.25)
+	smoothMove(setkeybind, {BackgroundTransparency = 1}, 0.25)
+	smoothMove(setkeybindStroke, {Transparency = 1}, 0.25)
+	smoothMove(progressBg, {BackgroundTransparency = 1}, 0.25)
+	smoothMove(creditsFrame, {BackgroundTransparency = 1}, 0.25)
+	smoothMove(creditsStroke, {Transparency = 1}, 0.25)
+	smoothMove(sliderBg, {BackgroundTransparency = 1}, 0.25)
+	smoothMove(sliderKnob, {BackgroundTransparency = 1}, 0.25)
+	smoothMove(sliderKnobStroke, {Transparency = 1}, 0.25)
+	smoothMove(keybindBtn, {BackgroundTransparency = 1}, 0.25)
+	smoothMove(closeBtn, {BackgroundTransparency = 1}, 0.25)
+	smoothMove(dragBar, {BackgroundTransparency = 1}, 0.25)
+	for _, child in ipairs(draggable:GetDescendants()) do
+		if child:IsA("TextLabel") or child:IsA("TextButton") then
+			if child.Parent ~= confirmPopup then
+				smoothMove(child, {TextTransparency = 1}, 0.2)
+			end
+		end
+	end
+	task.wait(0.25)
+	draggable.Visible = false
+	menuVisible = false
+end)
+
+-- -------------------------------------------
 local function fadeInAll()
 	smoothMove(draggable, {BackgroundTransparency = 0.12, Position = UDim2.new(0.35, 0, 0.25, 0)}, 0.35, Enum.EasingStyle.Quart)
 	smoothMove(draggableStroke, {Transparency = 0.7}, 0.35)
@@ -808,57 +984,20 @@ local function fadeInAll()
 	smoothMove(sliderBg, {BackgroundTransparency = 0.6}, 0.35)
 	smoothMove(sliderKnob, {BackgroundTransparency = 0}, 0.35)
 	smoothMove(sliderKnobStroke, {Transparency = 0}, 0.35)
-	smoothMove(keybindBtn, {BackgroundTransparency = 0.5}, 0.35)
-	smoothMove(closeBtn, {BackgroundTransparency = 0.78}, 0.35)
+	smoothMove(keybindBtn, {BackgroundTransparency = 1}, 0.35)
+	smoothMove(closeBtn, {BackgroundTransparency = 1}, 0.35)
 	smoothMove(dragBar, {BackgroundTransparency = 0.95}, 0.35)
 	for _, child in ipairs(draggable:GetDescendants()) do
 		if child:IsA("TextLabel") or child:IsA("TextButton") then
-			smoothMove(child, {TextTransparency = 0}, 0.3)
+			if child.Parent ~= confirmPopup then
+				smoothMove(child, {TextTransparency = 0}, 0.3)
+			end
 		end
 	end
-	smoothMove(toggleIcon, {Rotation = 0}, 0.3)
 end
 
-local function fadeOutAll()
-	smoothMove(draggable, {BackgroundTransparency = 1, Position = UDim2.new(0.35, 0, 0.12, -200)}, 0.28, Enum.EasingStyle.Quart)
-	smoothMove(draggableStroke, {Transparency = 1}, 0.28)
-	smoothMove(divider1, {BackgroundTransparency = 1}, 0.28)
-	smoothMove(CPSbox, {BackgroundTransparency = 1}, 0.28)
-	smoothMove(CPSboxStroke, {Transparency = 1}, 0.28)
-	smoothMove(clicking, {BackgroundTransparency = 1}, 0.28)
-	smoothMove(clickingStroke, {Transparency = 1}, 0.28)
-	smoothMove(setkeybind, {BackgroundTransparency = 1}, 0.28)
-	smoothMove(setkeybindStroke, {Transparency = 1}, 0.28)
-	smoothMove(progressBg, {BackgroundTransparency = 1}, 0.28)
-	smoothMove(creditsFrame, {BackgroundTransparency = 1}, 0.28)
-	smoothMove(creditsStroke, {Transparency = 1}, 0.28)
-	smoothMove(sliderBg, {BackgroundTransparency = 1}, 0.28)
-	smoothMove(sliderKnob, {BackgroundTransparency = 1}, 0.28)
-	smoothMove(sliderKnobStroke, {Transparency = 1}, 0.28)
-	smoothMove(keybindBtn, {BackgroundTransparency = 1}, 0.28)
-	smoothMove(closeBtn, {BackgroundTransparency = 1}, 0.28)
-	smoothMove(dragBar, {BackgroundTransparency = 1}, 0.28)
-	for _, child in ipairs(draggable:GetDescendants()) do
-		if child:IsA("TextLabel") or child:IsA("TextButton") then
-			smoothMove(child, {TextTransparency = 1}, 0.2)
-		end
-	end
-	smoothMove(toggleIcon, {Rotation = 180}, 0.28)
-end
-
-local function toggleMenuVisibility(shouldBeVisible)
-	menuVisible = shouldBeVisible
-	if shouldBeVisible then
-		draggable.Visible = true
-		fadeInAll()
-	else
-		fadeOutAll()
-		task.wait(0.28)
-		draggable.Visible = false
-	end
-end
-
-local function initializeGUI()
+-- -------------------------------------------
+local function LoadUI()
 	draggable.Visible = true
 	draggable.BackgroundTransparency = 1
 	draggable.Position = UDim2.new(0.35, 0, 0.12, -200)
@@ -866,5 +1005,6 @@ local function initializeGUI()
 	fadeInAll()
 end
 
-initializeGUI()
+-- -------------------------------------------
+LoadUI()
 -- -------------------------------------------
