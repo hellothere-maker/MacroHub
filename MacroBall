@@ -1,5 +1,6 @@
 -- -------------------------------------------
 local Players = game:GetService("Players")
+local ContextActionService = game:GetService("ContextActionService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
@@ -184,7 +185,7 @@ cpsTargetLabel.BackgroundTransparency = 1
 cpsTargetLabel.Position = UDim2.new(0, 12, 0, 0)
 cpsTargetLabel.Size = UDim2.new(0.5, 0, 0.55, 0)
 cpsTargetLabel.Font = Enum.Font.GothamSemibold
-cpsTargetLabel.Text = "target: 700"
+cpsTargetLabel.Text = "CPS: 700"
 cpsTargetLabel.TextColor3 = Color3.fromRGB(150, 150, 190)
 cpsTargetLabel.TextTransparency = 1
 cpsTargetLabel.TextSize = 10
@@ -193,13 +194,13 @@ cpsTargetLabel.ZIndex = 5
 
 -- -------------------------------------------
 local cpsActualLabel = Instance.new("TextLabel")
-cpsActualLabel.Name = "calculated_CPS"
+cpsActualLabel.Name = "cpsActualLabel"
 cpsActualLabel.Parent = CPSbox
 cpsActualLabel.BackgroundTransparency = 1
 cpsActualLabel.Position = UDim2.new(0, 12, 0.5, 0)
 cpsActualLabel.Size = UDim2.new(0.5, 0, 0.5, 0)
 cpsActualLabel.Font = Enum.Font.GothamBold
-cpsActualLabel.Text = "actual: 0"
+cpsActualLabel.Text = "CPS: 700"
 cpsActualLabel.TextColor3 = Color3.fromRGB(180, 180, 220)
 cpsActualLabel.TextTransparency = 1
 cpsActualLabel.TextSize = 10
@@ -214,7 +215,7 @@ cpsValue.BackgroundTransparency = 1
 cpsValue.Position = UDim2.new(0.5, -12, 0, 0)
 cpsValue.Size = UDim2.new(0.5, 0, 1, 0)
 cpsValue.Font = Enum.Font.GothamBlack
-cpsValue.Text = "0"
+cpsValue.Text = "700"
 cpsValue.TextColor3 = Color3.fromRGB(100, 190, 255)
 cpsValue.TextTransparency = 1
 cpsValue.TextSize = 18
@@ -497,16 +498,28 @@ versionLabel.TextXAlignment = Enum.TextXAlignment.Right
 versionLabel.ZIndex = 5
 
 -- -------------------------------------------
+local confirmOverlay = Instance.new("Frame")
+confirmOverlay.Name = "confirmOverlay"
+confirmOverlay.Parent = draggable
+confirmOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+confirmOverlay.BackgroundTransparency = 1
+confirmOverlay.BorderSizePixel = 0
+confirmOverlay.Position = UDim2.new(0, 0, 0, 0)
+confirmOverlay.Size = UDim2.new(1, 0, 1, 0)
+confirmOverlay.ZIndex = 18
+confirmOverlay.Visible = false
+addCorner(confirmOverlay, 10)
+
+-- -------------------------------------------
 local confirmPopup = Instance.new("Frame")
 confirmPopup.Name = "confirmPopup"
-confirmPopup.Parent = draggable
+confirmPopup.Parent = confirmOverlay
 confirmPopup.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
 confirmPopup.BackgroundTransparency = 1
 confirmPopup.BorderSizePixel = 0
 confirmPopup.Position = UDim2.new(0.5, -110, 0.5, -30)
 confirmPopup.Size = UDim2.new(0, 220, 0, 60)
 confirmPopup.ZIndex = 20
-confirmPopup.Visible = false
 addCorner(confirmPopup, 8)
 
 -- -------------------------------------------
@@ -567,45 +580,29 @@ addCorner(confirmNo, 5)
 
 -- -------------------------------------------
 confirmYes.MouseEnter:Connect(function()
-	smoothMove(confirmYes, {BackgroundTransparency = 0.2, Rotation = -5}, 0.1)
+	smoothMove(confirmYes, {BackgroundTransparency = 0.2, Rotation = -5}, 0.1, Enum.EasingStyle.Elastic)
 end)
 
 -- -------------------------------------------
 confirmYes.MouseLeave:Connect(function()
-	smoothMove(confirmYes, {BackgroundTransparency = 1, Rotation = 0}, 0.1)
+	smoothMove(confirmYes, {BackgroundTransparency = 1, Rotation = 0}, 0.1, Enum.EasingStyle.Elastic)
 end)
 
 -- -------------------------------------------
 confirmNo.MouseEnter:Connect(function()
-	smoothMove(confirmNo, {BackgroundTransparency = 0.2, Rotation = 5}, 0.1)
+	smoothMove(confirmNo, {BackgroundTransparency = 0.2, Rotation = 5}, 0.1, Enum.EasingStyle.Elastic)
 end)
 
 -- -------------------------------------------
 confirmNo.MouseLeave:Connect(function()
-	smoothMove(confirmNo, {BackgroundTransparency = 1, Rotation = 0}, 0.1)
+	smoothMove(confirmNo, {BackgroundTransparency = 1, Rotation = 0}, 0.1, Enum.EasingStyle.Elastic)
 end)
 
 -- -------------------------------------------
-local menuVisible = true
+local GuiDestroyed = false
 local isClickingActive = false
-local activationKey = Enum.KeyCode.F
-local waitingForBind = nil
-local heartbeatConn = nil
-local renderConn = nil
-local preRenderConn = nil
-local cpsUpdaterThread = nil
-
--- -------------------------------------------
-local totalClicks = 0
-local lastTimeChecked = tick()
-local calculatedCPS = 0
-local cpsHistoryTable = {}
-local maxCPSRecorded = 0
-local nextHeartbeatTime = 0
-local nextRenderTime = 0
-local nextPreRenderTime = 0
-local maxClicksPerFrame = 100
-local posCycleIndex = 0
+local macroConnection = nil
+local macroActionName = "MacroClash"
 
 -- -------------------------------------------
 local targetCPS = 700
@@ -622,26 +619,17 @@ local posOffsets = {
 	Vector2.new(2, 1), Vector2.new(1, 2), Vector2.new(-2, 0), Vector2.new(0, -2),
 	Vector2.new(-1, 1), Vector2.new(1, -1), Vector2.new(-2, -1), Vector2.new(2, -1)
 }
+local posCycleIndex = 0
 
 -- -------------------------------------------
-local function fireBlockClick()
+local function fireBlockClick(count)
 	if blockClickX == 0 and blockClickY == 0 then return end
 	posCycleIndex = (posCycleIndex % 16) + 1
 	local offset = posOffsets[posCycleIndex]
-	local mX = blockClickX + offset.X
-	local mY = blockClickY + offset.Y
 	pcall(function()
-		VirtualInputManager:SendMouseButtonEvent(mX, mY, 0, true, game, 0)
-		VirtualInputManager:SendMouseButtonEvent(mX, mY, 0, false, game, 0)
+		VirtualInputManager:SendMouseButtonEvent(blockClickX + offset.X, blockClickY + offset.Y, 0, true, game, count)
+		VirtualInputManager:SendMouseButtonEvent(blockClickX + offset.X, blockClickY + offset.Y, 0, false, game, count)
 	end)
-end
-
--- -------------------------------------------
-local function burstBlockClicks(count)
-	for i = 1, count do
-		fireBlockClick()
-		totalClicks = totalClicks + 1
-	end
 end
 
 -- -------------------------------------------
@@ -649,11 +637,13 @@ local function updateSliderVisuals()
 	local percent = (targetCPS - minCPS) / (maxCPS - minCPS)
 	sliderFill.Size = UDim2.new(percent, 0, 1, 0)
 	sliderKnob.Position = UDim2.new(percent, -7, 0.5, -7)
-	cpsTargetLabel.Text = "target: " .. tostring(targetCPS)
+	cpsTargetLabel.Text = "CPS: " .. tostring(targetCPS)
+	cpsActualLabel.Text = "CPS: " .. tostring(targetCPS)
+	cpsValue.Text = tostring(targetCPS)
 end
 
 -- -------------------------------------------
-local function handleSliderDrag()
+local function dragSlider()
 	local mousePos = UserInputService:GetMouseLocation()
 	local sliderAbsPos = sliderBg.AbsolutePosition
 	local sliderAbsSize = sliderBg.AbsoluteSize
@@ -669,7 +659,7 @@ end
 -- -------------------------------------------
 sliderKnob.MouseButton1Down:Connect(function()
 	isDraggingSlider = true
-	handleSliderDrag()
+	dragSlider()
 end)
 
 -- -------------------------------------------
@@ -682,7 +672,7 @@ end)
 -- -------------------------------------------
 UserInputService.InputChanged:Connect(function(input)
 	if isDraggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
-		handleSliderDrag()
+		dragSlider()
 	end
 end)
 
@@ -690,174 +680,78 @@ end)
 sliderBg.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		isDraggingSlider = true
-		handleSliderDrag()
+		dragSlider()
 	end
 end)
 
 -- -------------------------------------------
-keybindBtn.MouseButton1Click:Connect(function()
-	waitingForBind = "activation"
-	keybindBtn.Text = "..."
-	keybindBtn.TextColor3 = Color3.fromRGB(255, 200, 100)
-	local connection
-	connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-		if gameProcessed then return end
-		if waitingForBind == "activation" and input.UserInputType == Enum.UserInputType.Keyboard then
-			activationKey = input.KeyCode
-			keybindBtn.Text = activationKey.Name
-			keybindBtn.TextColor3 = Color3.fromRGB(200, 200, 230)
-			waitingForBind = nil
-			connection:Disconnect()
+local function macroLoop()
+	local interval = 1.0 / targetCPS
+	local nextTime = tick()
+	while isClickingActive and not GuiDestroyed do
+		local now = tick()
+		if now >= nextTime then
+			local missed = math.floor((now - nextTime) / interval) + 1
+			missed = math.clamp(missed, 1, 200)
+			fireBlockClick(missed)
+			nextTime = nextTime + (missed * interval)
+			if nextTime <= now then
+				nextTime = now + interval
+			end
 		end
-	end)
-end)
-
--- -------------------------------------------
-local function refreshCPSDisplay()
-	local timeNow = tick()
-	local deltaTime = timeNow - lastTimeChecked
-	if deltaTime >= 0.1 then
-		calculatedCPS = totalClicks / deltaTime
-		table.insert(cpsHistoryTable, calculatedCPS)
-		if #cpsHistoryTable > 10 then
-			table.remove(cpsHistoryTable, 1)
-		end
-		local smoothCPS = 0
-		for i = 1, #cpsHistoryTable do
-			smoothCPS = smoothCPS + cpsHistoryTable[i]
-		end
-		smoothCPS = smoothCPS / #cpsHistoryTable
-		if smoothCPS > maxCPSRecorded then
-			maxCPSRecorded = smoothCPS
-		end
-		totalClicks = 0
-		lastTimeChecked = timeNow
-		local displayValue = math.floor(smoothCPS + 0.5)
-		cpsValue.Text = tostring(displayValue)
-		cpsActualLabel.Text = "actual: " .. tostring(displayValue)
-		local percentToTarget = smoothCPS / targetCPS
-		if percentToTarget >= 0.92 then
-			cpsValue.TextColor3 = Color3.fromRGB(100, 220, 100)
-		elseif percentToTarget >= 0.65 then
-			cpsValue.TextColor3 = Color3.fromRGB(100, 190, 255)
-		else
-			cpsValue.TextColor3 = Color3.fromRGB(255, 160, 100)
-		end
-	end
-end
-
--- -------------------------------------------
-local function cpsUpdateLoopFunction()
-	while isClickingActive do
-		refreshCPSDisplay()
-		local percentForBar = math.clamp(calculatedCPS / targetCPS, 0, 1)
-		smoothMove(progressFill, {Size = UDim2.new(percentForBar, 0, 1, 0)}, 0.04)
-		task.wait(0.05)
-	end
-end
-
--- -------------------------------------------
-local function heartbeatBurst()
-	if not isClickingActive then return end
-	local now = tick()
-	if now >= nextHeartbeatTime then
-		local diff = now - nextHeartbeatTime
-		local interval = 1.0 / (targetCPS / 3)
-		local needed = math.floor(diff / interval) + 1
-		needed = math.clamp(needed, 1, maxClicksPerFrame)
-		burstBlockClicks(needed)
-		nextHeartbeatTime = nextHeartbeatTime + (needed * interval)
-		if nextHeartbeatTime <= now then
-			nextHeartbeatTime = now + interval
-		end
-	end
-end
-
--- -------------------------------------------
-local function renderBurst()
-	if not isClickingActive then return end
-	local now = tick()
-	if now >= nextRenderTime then
-		local diff = now - nextRenderTime
-		local interval = 1.0 / (targetCPS / 3)
-		local needed = math.floor(diff / interval) + 1
-		needed = math.clamp(needed, 1, maxClicksPerFrame)
-		burstBlockClicks(needed)
-		nextRenderTime = nextRenderTime + (needed * interval)
-		if nextRenderTime <= now then
-			nextRenderTime = now + interval
-		end
-	end
-end
-
--- -------------------------------------------
-local function preRenderBurst()
-	if not isClickingActive then return end
-	local now = tick()
-	if now >= nextPreRenderTime then
-		local diff = now - nextPreRenderTime
-		local interval = 1.0 / (targetCPS / 3)
-		local needed = math.floor(diff / interval) + 1
-		needed = math.clamp(needed, 1, maxClicksPerFrame)
-		burstBlockClicks(needed)
-		nextPreRenderTime = nextPreRenderTime + (needed * interval)
-		if nextPreRenderTime <= now then
-			nextPreRenderTime = now + interval
-		end
+		RunService.RenderStepped:Wait()
 	end
 end
 
 -- -------------------------------------------
 local function startTheClicking()
+	if GuiDestroyed then return end
 	if isClickingActive then return end
 	isClickingActive = true
-	totalClicks = 0
-	lastTimeChecked = tick()
-	calculatedCPS = 0
-	maxCPSRecorded = 0
-	cpsHistoryTable = {}
-	nextHeartbeatTime = tick()
-	nextRenderTime = tick()
-	nextPreRenderTime = tick()
-	posCycleIndex = 0
-	maxClicksPerFrame = math.clamp(math.ceil(targetCPS / 18), 1, 150)
-	cpsValue.Text = "0"
-	cpsValue.TextColor3 = Color3.fromRGB(100, 190, 255)
-	heartbeatConn = RunService.Heartbeat:Connect(heartbeatBurst)
-	renderConn = RunService.RenderStepped:Connect(renderBurst)
-	preRenderConn = RunService.PreRender:Connect(preRenderBurst)
-	cpsUpdaterThread = task.spawn(cpsUpdateLoopFunction)
+	updateSliderVisuals()
+	cpsValue.TextColor3 = Color3.fromRGB(100, 220, 100)
+	macroConnection = task.spawn(macroLoop)
 	smoothMove(draggableStroke, {Transparency = 0.3, Color = Color3.fromRGB(100, 190, 255)}, 0.08)
+	smoothMove(progressFill, {Size = UDim2.new(1, 0, 1, 0)}, 0.08)
 end
 
 -- -------------------------------------------
 local function stopTheClicking()
 	if not isClickingActive then return end
 	isClickingActive = false
-	if heartbeatConn then heartbeatConn:Disconnect() heartbeatConn = nil end
-	if renderConn then renderConn:Disconnect() renderConn = nil end
-	if preRenderConn then preRenderConn:Disconnect() preRenderConn = nil end
-	if cpsUpdaterThread then task.cancel(cpsUpdaterThread) cpsUpdaterThread = nil end
-	task.wait(0.05)
-	cpsValue.Text = tostring(math.floor(maxCPSRecorded + 0.5))
+	if macroConnection then task.cancel(macroConnection) macroConnection = nil end
+	cpsValue.Text = tostring(targetCPS)
+	cpsValue.TextColor3 = Color3.fromRGB(100, 190, 255)
 	smoothMove(progressFill, {Size = UDim2.new(0, 0, 1, 0)}, 0.2)
 	smoothMove(draggableStroke, {Transparency = 0.7, Color = Color3.fromRGB(255, 255, 255)}, 0.15)
 end
 
 -- -------------------------------------------
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.KeyCode == activationKey then
+local function onMacroAction(actionName, inputState, inputObject)
+	if inputState == Enum.UserInputState.Begin then
 		startTheClicking()
-	end
-end)
-
--- -------------------------------------------
-UserInputService.InputEnded:Connect(function(input)
-	if input.KeyCode == activationKey then
+	elseif inputState == Enum.UserInputState.End then
 		stopTheClicking()
 	end
-end)
+end
+
+-- -------------------------------------------
+local function bindMacroAction()
+	ContextActionService:BindActionAtPriority(macroActionName, onMacroAction, false, 10000, Enum.KeyCode.F)
+	ContextActionService:SetTitle(macroActionName, "MacroClash")
+	ContextActionService:SetDescription(macroActionName, "hold to spam")
+end
+
+-- -------------------------------------------
+bindMacroAction()
+
+-- -------------------------------------------
+local function DestroyEverything()
+	GuiDestroyed = true
+	stopTheClicking()
+	ContextActionService:UnbindAction(macroActionName)
+	xX_mainGuiHolder_Xx:Destroy()
+end
 
 -- -------------------------------------------
 local isDraggingFrame = false
@@ -896,8 +790,9 @@ end)
 
 -- -------------------------------------------
 local function showConfirmPopup()
-	confirmPopup.Visible = true
-	smoothMove(confirmPopup, {BackgroundTransparency = 0.4}, 0.2)
+	confirmOverlay.Visible = true
+	smoothMove(confirmOverlay, {BackgroundTransparency = 0.3}, 0.15)
+	smoothMove(confirmPopup, {BackgroundTransparency = 0.4, Size = UDim2.new(0, 220, 0, 60)}, 0.2, Enum.EasingStyle.Elastic)
 	smoothMove(confirmPopupStroke, {Transparency = 0.3}, 0.2)
 	smoothMove(confirmLabel, {TextTransparency = 0}, 0.2)
 	smoothMove(confirmYes, {TextTransparency = 0, BackgroundTransparency = 1}, 0.2)
@@ -906,13 +801,14 @@ end
 
 -- -------------------------------------------
 local function hideConfirmPopup()
-	smoothMove(confirmPopup, {BackgroundTransparency = 1}, 0.15)
-	smoothMove(confirmPopupStroke, {Transparency = 1}, 0.15)
-	smoothMove(confirmLabel, {TextTransparency = 1}, 0.15)
-	smoothMove(confirmYes, {TextTransparency = 1, BackgroundTransparency = 1}, 0.15)
-	smoothMove(confirmNo, {TextTransparency = 1, BackgroundTransparency = 1}, 0.15)
-	task.wait(0.15)
-	confirmPopup.Visible = false
+	smoothMove(confirmOverlay, {BackgroundTransparency = 1}, 0.1)
+	smoothMove(confirmPopup, {BackgroundTransparency = 1}, 0.1)
+	smoothMove(confirmPopupStroke, {Transparency = 1}, 0.1)
+	smoothMove(confirmLabel, {TextTransparency = 1}, 0.1)
+	smoothMove(confirmYes, {TextTransparency = 1, BackgroundTransparency = 1}, 0.1)
+	smoothMove(confirmNo, {TextTransparency = 1, BackgroundTransparency = 1}, 0.1)
+	task.wait(0.1)
+	confirmOverlay.Visible = false
 end
 
 -- -------------------------------------------
@@ -923,48 +819,13 @@ end)
 -- -------------------------------------------
 confirmYes.MouseButton1Click:Connect(function()
 	hideConfirmPopup()
-	task.wait(0.15)
-	draggable.Visible = false
-	menuVisible = false
+	task.wait(0.1)
+	DestroyEverything()
 end)
 
 -- -------------------------------------------
 confirmNo.MouseButton1Click:Connect(function()
-	smoothMove(confirmPopup, {BackgroundTransparency = 1}, 0.2)
-	smoothMove(confirmPopupStroke, {Transparency = 1}, 0.2)
-	smoothMove(confirmLabel, {TextTransparency = 1}, 0.2)
-	smoothMove(confirmYes, {TextTransparency = 1, BackgroundTransparency = 1}, 0.2)
-	smoothMove(confirmNo, {TextTransparency = 1, BackgroundTransparency = 1}, 0.2)
-	task.wait(0.2)
-	confirmPopup.Visible = false
-	smoothMove(draggable, {BackgroundTransparency = 1, Position = UDim2.new(0.35, 0, 0.12, -200)}, 0.25, Enum.EasingStyle.Quart)
-	smoothMove(draggableStroke, {Transparency = 1}, 0.25)
-	smoothMove(divider1, {BackgroundTransparency = 1}, 0.25)
-	smoothMove(CPSbox, {BackgroundTransparency = 1}, 0.25)
-	smoothMove(CPSboxStroke, {Transparency = 1}, 0.25)
-	smoothMove(clicking, {BackgroundTransparency = 1}, 0.25)
-	smoothMove(clickingStroke, {Transparency = 1}, 0.25)
-	smoothMove(setkeybind, {BackgroundTransparency = 1}, 0.25)
-	smoothMove(setkeybindStroke, {Transparency = 1}, 0.25)
-	smoothMove(progressBg, {BackgroundTransparency = 1}, 0.25)
-	smoothMove(creditsFrame, {BackgroundTransparency = 1}, 0.25)
-	smoothMove(creditsStroke, {Transparency = 1}, 0.25)
-	smoothMove(sliderBg, {BackgroundTransparency = 1}, 0.25)
-	smoothMove(sliderKnob, {BackgroundTransparency = 1}, 0.25)
-	smoothMove(sliderKnobStroke, {Transparency = 1}, 0.25)
-	smoothMove(keybindBtn, {BackgroundTransparency = 1}, 0.25)
-	smoothMove(closeBtn, {BackgroundTransparency = 1}, 0.25)
-	smoothMove(dragBar, {BackgroundTransparency = 1}, 0.25)
-	for _, child in ipairs(draggable:GetDescendants()) do
-		if child:IsA("TextLabel") or child:IsA("TextButton") then
-			if child.Parent ~= confirmPopup then
-				smoothMove(child, {TextTransparency = 1}, 0.2)
-			end
-		end
-	end
-	task.wait(0.25)
-	draggable.Visible = false
-	menuVisible = false
+	hideConfirmPopup()
 end)
 
 -- -------------------------------------------
@@ -989,7 +850,7 @@ local function fadeInAll()
 	smoothMove(dragBar, {BackgroundTransparency = 0.95}, 0.35)
 	for _, child in ipairs(draggable:GetDescendants()) do
 		if child:IsA("TextLabel") or child:IsA("TextButton") then
-			if child.Parent ~= confirmPopup then
+			if child.Parent ~= confirmOverlay and child.Parent ~= confirmPopup then
 				smoothMove(child, {TextTransparency = 0}, 0.3)
 			end
 		end
